@@ -6,6 +6,7 @@ import { DiaryPage } from './components/DiaryPage';
 import { ProfileModal } from './components/ProfileModal';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthModal } from './components/AuthModal';
+import { PasswordResetPage } from './components/PasswordResetPage';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
 import { useAuthStore } from './store/useAuthStore';
@@ -14,6 +15,15 @@ import { PlusCircle, LogIn, LogOut, X, Trash2, Book, UserCircle, Users, AlertCir
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
+  // Check if this is a password reset page
+  const isPasswordResetPage = window.location.hash.includes('type=recovery') || 
+                              window.location.pathname === '/reset-password';
+
+  // If it's a password reset page, render the password reset component
+  if (isPasswordResetPage) {
+    return <PasswordResetPage />;
+  }
+
   const [stars, setStars] = useState<Star[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStar, setSelectedStar] = useState<Star | null>(null);
