@@ -33,7 +33,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (error) {
       console.error('Error initializing auth:', error);
-      set({ loading: false, error: 'Failed to initialize authentication' });
+      
+      // Handle invalid refresh token error
+      if (error instanceof Error && error.message.includes('Invalid Refresh Token')) {
+        // Clear stale session data
+        await supabase.auth.signOut();
+        set({ user: null, loading: false, error: null });
+      } else {
+        set({ loading: false, error: 'Failed to initialize authentication' });
+      }
     }
   },
   signIn: async (email, password) => {
