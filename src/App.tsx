@@ -507,7 +507,7 @@ function App() {
 
       {/* Unified Search */}
       <AnimatePresence>
-        {showSearch && (
+        {showSearch && user && (
           <UnifiedSearch
             onClose={() => setShowSearch(false)}
             onStarSelect={(star) => {
