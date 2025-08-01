@@ -20,8 +20,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   // Check if this is a password reset page
-  const isPasswordResetPage = window.location.hash.includes('type=recovery') || 
-                              window.location.pathname === '/reset-password';
+  const isPasswordResetPage = window.location.pathname === '/reset-password' ||
+                              window.location.hash.includes('type=recovery');
 
   // If it's a password reset page, render the password reset component
   if (isPasswordResetPage) {
