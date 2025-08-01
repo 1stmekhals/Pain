@@ -224,6 +224,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           {/* Cosmic gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
           
+          <button
+            onClick={handleClose}
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10"
+          >
+            <X size={24} />
+          </button>
+          
           {mode === 'forgot' && (
             <button
               onClick={() => setMode('signin')}
@@ -545,8 +552,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         }}
                         className="w-full py-3 border-2 border-purple-500 text-purple-400 rounded-xl hover:bg-purple-500/10 transition-all duration-200 font-medium backdrop-blur-sm"
                       >
-            <Logo size={64} showText={false} />
-          </AnimatePresence>
+                        Sign In Instead
+                      </button>
+                    </>
+                  )}
+                </div>
+              </motion.form>
         </div>
       </motion.div>
     </motion.div>
