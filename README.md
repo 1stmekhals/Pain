@@ -1,8 +1,8 @@
-# 🌟 Starry Messages
+# 🌟 Star Letter
 
 A beautiful, interactive web application where users can create and share messages as stars in a virtual night sky. Experience the magic of leaving your thoughts among the stars for others to discover.
 
-![Starry Messages](https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&h=400&fit=crop)
+![Star Letter](https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&h=400&fit=crop)
 
 ## ✨ Features
 
@@ -65,7 +65,7 @@ A beautiful, interactive web application where users can create and share messag
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd starry-messages
+   cd star-letter
    ```
 
 2. **Install dependencies**

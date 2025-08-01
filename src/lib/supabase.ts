@@ -20,7 +20,7 @@ export const supabase = createClient(normalizedUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'x-application-name': 'starry-messages'
+      'x-application-name': 'star-letter'
     }
   },
   db: {

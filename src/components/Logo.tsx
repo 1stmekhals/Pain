@@ -118,7 +118,7 @@ export const Logo: React.FC<LogoProps> = ({
       {showText && (
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-            Starry Messages
+            Star Letter
           </h1>
           <p className="text-sm text-gray-400 font-medium">
             Leave your mark among the stars

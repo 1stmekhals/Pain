@@ -10,6 +10,7 @@ import { UnifiedSearch } from './components/UnifiedSearch';
 import { SkySelector } from './components/SkySelector';
 import { HamburgerMenu } from './components/HamburgerMenu';
 import { SettingsModal } from './components/SettingsModal';
+import { InstallPrompt } from './components/InstallPrompt';
 import { useLocationTime } from './hooks/useLocationTime';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
@@ -532,6 +533,9 @@ function App() {
           />
         )}
       </AnimatePresence>
+
+      {/* PWA Install Prompt */}
+      <InstallPrompt />
     </div>
   );
 }
