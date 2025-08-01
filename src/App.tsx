@@ -46,6 +46,17 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const { isDayTime, isLoading: timeLoading, error: timeError } = useLocationTime();
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+  const [prevUser, setPrevUser] = useState<any | null>(null);
+
+  // Handle logout - change to general sky when user logs out
+  useEffect(() => {
+    if (prevUser && !user) {
+      // User just logged out
+      setCurrentSky('general');
+      setViewingUserId(null);
+    }
+    setPrevUser(user);
+  }, [user, prevUser]);
 
   useEffect(() => {
     const checkConnection = async () => {
