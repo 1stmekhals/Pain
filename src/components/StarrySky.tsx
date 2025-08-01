@@ -70,6 +70,53 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               </div>
             ))}
           </div>
+          {/* Sun */}
+          <div className="absolute right-20 top-20 w-32 h-32">
+            <div
+              className="w-full h-full rounded-full"
+              style={{
+                background: 'radial-gradient(circle at 30% 30%, #ffeb3b 0%, #ffc107 40%, #ff9800 100%)',
+                boxShadow: '0 0 50px rgba(255, 235, 59, 0.6), 0 0 100px rgba(255, 235, 59, 0.4)',
+              }}
+            />
+          </div>
+
+          {/* Clouds */}
+          <div className="absolute inset-0">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={`cloud-${i}`}
+                className="absolute opacity-80"
+                style={{
+                  left: `${Math.random() * 80 + 10}%`,
+                  top: `${Math.random() * 40 + 10}%`,
+                  width: `${Math.random() * 100 + 80}px`,
+                  height: `${Math.random() * 40 + 30}px`,
+                  background: 'radial-gradient(ellipse, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 50%, transparent 100%)',
+                  borderRadius: '50px',
+                  filter: 'blur(1px)',
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Birds */}
+          <div className="absolute inset-0">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={`bird-${i}`}
+                className="absolute text-gray-700 opacity-60"
+                style={{
+                  left: `${Math.random() * 70 + 15}%`,
+                  top: `${Math.random() * 30 + 20}%`,
+                  fontSize: '12px',
+                  transform: `rotate(${Math.random() * 30 - 15}deg)`,
+                }}
+              >
+                ᵛ
+              </div>
+            ))}
+          </div>
         </>
       ) : (
         <>
