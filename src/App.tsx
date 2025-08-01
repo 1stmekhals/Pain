@@ -206,14 +206,20 @@ function App() {
     }
 
     // Check if star name already exists
-    const { data: existingStar } = await supabase
-      .from('stars')
-      .select('id')
-      .eq('star_name', starName)
-      .single();
+    try {
+      const { data: existingStar } = await supabase
+        .from('stars')
+        .select('id')
+        .eq('star_name', starName)
+        .maybeSingle();
 
-    if (existingStar) {
-      setError('A star with this name already exists. Please choose a different name.');
+      if (existingStar) {
+        setError('A star with this name already exists. Please choose a different name.');
+        return;
+      }
+    } catch (err) {
+      console.error('Error checking star name:', err);
+      setError('Failed to validate star name. Please try again.');
       return;
     }
 
@@ -241,7 +247,11 @@ function App() {
 
       if (insertError) {
         console.error('Error creating star:', insertError);
-        setError('Failed to create star. Please try again.');
+        if (insertError.code === '23505') {
+          setError('A star with this name already exists. Please choose a different name.');
+        } else {
+          setError('Failed to create star. Please try again.');
+        }
         return;
       }
 

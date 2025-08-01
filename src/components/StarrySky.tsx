@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star } from '../types/star';
 
@@ -7,22 +7,129 @@ interface StarrySkyProps {
   onStarClick: (star: Star) => void;
 }
 
+interface ShootingStar {
+  id: string;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  duration: number;
+}
+
 export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick }) => {
   const [hoveredStar, setHoveredStar] = useState<string | null>(null);
+  const [shootingStars, setShootingStars] = useState<ShootingStar[]>([]);
+
+  // Generate shooting stars every 5 seconds
+  useEffect(() => {
+    const generateShootingStar = () => {
+      const newShootingStar: ShootingStar = {
+        id: Math.random().toString(36).substr(2, 9),
+        startX: Math.random() * 100,
+        startY: -5,
+        endX: Math.random() * 100,
+        endY: Math.random() * 50 + 25,
+        duration: Math.random() * 2 + 1.5, // 1.5-3.5 seconds
+      };
+
+      setShootingStars(prev => [...prev, newShootingStar]);
+
+      // Remove shooting star after animation
+      setTimeout(() => {
+        setShootingStars(prev => prev.filter(star => star.id !== newShootingStar.id));
+      }, newShootingStar.duration * 1000 + 500);
+    };
+
+    // Generate first shooting star after 2 seconds
+    const initialTimeout = setTimeout(generateShootingStar, 2000);
+    
+    // Then generate every 5 seconds
+    const interval = setInterval(generateShootingStar, 5000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* Static night sky background */}
+      {/* Realistic night sky background with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-blue-900 to-black" />
+      
+      {/* Stars background layer */}
+      <div className="absolute inset-0">
+        {/* Generate random background stars */}
+        {Array.from({ length: 200 }).map((_, i) => (
+          <div
+            key={`bg-star-${i}`}
+            className="absolute w-1 h-1 bg-white rounded-full opacity-60"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `twinkle-${['slow', 'medium', 'fast'][Math.floor(Math.random() * 3)]} ${Math.random() * 3 + 2}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Milky Way effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 opacity-20"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&q=80&w=2940")',
-          filter: 'brightness(0.4)',
+          background: 'radial-gradient(ellipse 80% 40% at 50% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)',
         }}
       />
-      
-      {/* Overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
+
+      {/* Shooting stars */}
+      <AnimatePresence>
+        {shootingStars.map((shootingStar) => (
+          <motion.div
+            key={shootingStar.id}
+            className="absolute"
+            initial={{
+              x: `${shootingStar.startX}%`,
+              y: `${shootingStar.startY}%`,
+              opacity: 0,
+            }}
+            animate={{
+              x: `${shootingStar.endX}%`,
+              y: `${shootingStar.endY}%`,
+              opacity: [0, 1, 1, 0],
+            }}
+            transition={{
+              duration: shootingStar.duration,
+              ease: "easeOut",
+            }}
+            style={{
+              width: '2px',
+              height: '2px',
+            }}
+          >
+            {/* Shooting star trail */}
+            <div
+              className="absolute bg-gradient-to-r from-white via-blue-200 to-transparent rounded-full"
+              style={{
+                width: '60px',
+                height: '2px',
+                transform: 'rotate(45deg)',
+                transformOrigin: 'left center',
+                boxShadow: '0 0 6px rgba(255, 255, 255, 0.8)',
+              }}
+            />
+            {/* Shooting star head */}
+            <div
+              className="absolute w-2 h-2 bg-white rounded-full"
+              style={{
+                boxShadow: '0 0 8px rgba(255, 255, 255, 0.9)',
+                left: '-1px',
+                top: '-1px',
+              }}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       {/* Interactive user-created stars */}
       <AnimatePresence>
@@ -226,10 +333,12 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick }) => {
         }}
       >
         <div className="relative w-full h-full">
-          <img 
-            src="https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?auto=format&fit=crop&q=80&w=256"
-            alt="Moon"
-            className="w-full h-full object-cover rounded-full"
+          <div
+            className="w-full h-full rounded-full"
+            style={{
+              background: 'radial-gradient(circle at 30% 30%, #f8f8ff 0%, #e6e6fa 30%, #d3d3d3 70%, #a9a9a9 100%)',
+              boxShadow: '0 0 20px rgba(248, 248, 255, 0.3), inset -10px -10px 20px rgba(0, 0, 0, 0.1)',
+            }}
           />
           <div
             className="absolute inset-0 rounded-full"
