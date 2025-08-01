@@ -211,16 +211,20 @@ function App() {
         .from('stars')
         .select('id')
         .eq('star_name', starName)
-        .maybeSingle();
+        .single();
 
       if (existingStar) {
         setError('A star with this name already exists. Please choose a different name.');
         return;
       }
-    } catch (err) {
-      console.error('Error checking star name:', err);
-      setError('Failed to validate star name. Please try again.');
-      return;
+    } catch (err: any) {
+      // If error code is PGRST116, it means no rows found (star name is available)
+      if (err.code !== 'PGRST116') {
+        console.error('Error checking star name:', err);
+        setError('Failed to validate star name. Please try again.');
+        return;
+      }
+      // Star name is available, continue
     }
 
     try {
