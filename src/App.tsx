@@ -131,9 +131,9 @@ function App() {
         .from('admin_users')
         .select('id')
         .eq('email', user.email)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
         return;
