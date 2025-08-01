@@ -558,6 +558,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   )}
                 </div>
               </motion.form>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </motion.div>
