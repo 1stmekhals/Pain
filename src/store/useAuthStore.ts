@@ -102,6 +102,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   signOut: async () => {
     try {
+      // Early return if user is already logged out locally
+      const currentState = useAuthStore.getState();
+      if (!currentState.user) {
+        set({ loading: false });
+        return;
+      }
+      
       set({ loading: true, error: null });
       
       // Check if there's an active session before attempting to sign out
