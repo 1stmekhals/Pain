@@ -6,8 +6,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthModal } from './components/AuthModal';
 import { PasswordResetPage } from './components/PasswordResetPage';
-import { SkySelector } from './components/SkySelector';
-import { UserSearch } from './components/UserSearch';
+import { UnifiedSearch } from './components/UnifiedSearch';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
 import { useAuthStore } from './store/useAuthStore';
@@ -38,7 +37,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
-  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -80,14 +79,14 @@ function App() {
       if (!target.closest('.star-message') && !target.closest('.interactive-star')) {
         setSelectedStar(null);
       }
-      if (!target.closest('.user-search') && showUserSearch) {
-        setShowUserSearch(false);
+      if (!target.closest('.unified-search') && showSearch) {
+        setShowSearch(false);
       }
     };
     
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showUserSearch, isConnected]);
+  }, [showSearch, isConnected]);
 
   useEffect(() => {
     if (!isConnected || !user) {
@@ -183,17 +182,17 @@ function App() {
     }
   };
 
-  const handleCreateStar = async (starName: string, message: string) => {
+  const handleCreateStar = async (starName: string, message: string): Promise<void> => {
     if (!isConnected) {
       setError('Unable to connect to the database. Please try again later.');
-      return;
+      throw new Error('Database connection error');
     }
 
     if (!user) {
       setError('Please sign in to create stars');
       setIsModalOpen(false);
       setIsAuthModalOpen(true);
-      return;
+      throw new Error('Authentication required');
     }
 
     try {
@@ -204,6 +203,7 @@ function App() {
       } while (x > 70 && y < 30); // Avoid moon area
 
       const newStar = {
+        star_name: starName,
         message,
         x,
         y,
@@ -219,7 +219,7 @@ function App() {
       if (insertError) {
         console.error('Error creating star:', insertError);
         setError('Failed to create star. Please try again.');
-        return;
+        throw new Error('Failed to create star');
       }
 
       setIsModalOpen(false);
@@ -228,6 +228,7 @@ function App() {
     } catch (err) {
       console.error('Error creating star:', err);
       setError('Failed to create star. Please try again.');
+      throw err;
     }
   };
 
@@ -358,11 +359,11 @@ function App() {
         {user ? (
           <>
             <button
-              onClick={() => setShowUserSearch(!showUserSearch)}
+              onClick={() => setShowSearch(!showSearch)}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
             >
               <Search size={20} />
-              <span className="hidden sm:inline">Search Users</span>
+              <span className="hidden sm:inline">Search</span>
             </button>
             <button
               onClick={() => setShowProfileModal(true)}
@@ -473,6 +474,19 @@ function App() {
           <AdminPanel
             isOpen={showAdminPanel}
             onClose={() => setShowAdminPanel(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Unified Search */}
+      <AnimatePresence>
+        {showSearch && (
+          <UnifiedSearch
+            onClose={() => setShowSearch(false)}
+            onStarSelect={(star) => {
+              setSelectedStar(star);
+              setShowSearch(false);
+            }}
           />
         )}
       </AnimatePresence>
