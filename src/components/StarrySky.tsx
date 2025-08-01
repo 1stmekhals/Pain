@@ -209,23 +209,130 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           onMouseEnter={() => setHoveredStar(star.id)}
           onMouseLeave={() => setHoveredStar(null)}
         >
-          {/* Star appearance changes based on day/night */}
-          <div
-            className="rounded-full transition-transform duration-200"
-            style={{
-              width: `${Math.max(star.size * 6, 12)}px`,
-              height: `${Math.max(star.size * 6, 12)}px`,
-              background: isDayTime 
-                ? 'radial-gradient(circle at 30% 30%, #4a90e2 0%, #357abd 40%, #2c5aa0 100%)'
-                : 'radial-gradient(circle at 30% 30%, #ffffff 0%, #fff8dc 40%, #ffd700 100%)',
-              boxShadow: `
-                0 0 ${Math.max(star.size * 3, 6)}px rgba(${isDayTime ? '74, 144, 226' : '255, 255, 255'}, ${star.brightness}),
-                0 0 ${Math.max(star.size * 6, 12)}px rgba(${isDayTime ? '74, 144, 226' : '255, 255, 255'}, ${star.brightness * 0.6}),
-                0 0 ${Math.max(star.size * 9, 18)}px rgba(${isDayTime ? '44, 90, 160' : '255, 215, 0'}, ${star.brightness * 0.4})
-              `,
-              transform: hoveredStar === star.id ? 'scale(1.3)' : 'scale(1)',
-            }}
-          />
+          {/* Realistic star with multiple layers */}
+          <div className="relative">
+            {/* Main star body */}
+            <div
+              className="absolute rounded-full transition-all duration-300"
+              style={{
+                width: `${Math.max(star.size * 8, 14)}px`,
+                height: `${Math.max(star.size * 8, 14)}px`,
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.4)' : 'scale(1)'}`,
+                background: isDayTime 
+                  ? `radial-gradient(circle at 35% 35%, 
+                      rgba(135, 206, 250, ${star.brightness * 0.9}) 0%, 
+                      rgba(70, 130, 180, ${star.brightness * 0.8}) 30%, 
+                      rgba(25, 25, 112, ${star.brightness * 0.6}) 70%, 
+                      rgba(0, 0, 139, ${star.brightness * 0.4}) 100%)`
+                  : `radial-gradient(circle at 35% 35%, 
+                      rgba(255, 255, 255, ${star.brightness}) 0%, 
+                      rgba(255, 248, 220, ${star.brightness * 0.9}) 25%, 
+                      rgba(255, 215, 0, ${star.brightness * 0.8}) 50%, 
+                      rgba(255, 140, 0, ${star.brightness * 0.6}) 75%, 
+                      rgba(255, 69, 0, ${star.brightness * 0.3}) 100%)`,
+                boxShadow: isDayTime 
+                  ? `
+                    0 0 ${Math.max(star.size * 4, 8)}px rgba(135, 206, 250, ${star.brightness * 0.8}),
+                    0 0 ${Math.max(star.size * 8, 16)}px rgba(70, 130, 180, ${star.brightness * 0.5}),
+                    0 0 ${Math.max(star.size * 12, 24)}px rgba(25, 25, 112, ${star.brightness * 0.3})
+                  `
+                  : `
+                    0 0 ${Math.max(star.size * 4, 8)}px rgba(255, 255, 255, ${star.brightness * 0.9}),
+                    0 0 ${Math.max(star.size * 8, 16)}px rgba(255, 215, 0, ${star.brightness * 0.7}),
+                    0 0 ${Math.max(star.size * 12, 24)}px rgba(255, 140, 0, ${star.brightness * 0.5}),
+                    0 0 ${Math.max(star.size * 16, 32)}px rgba(255, 69, 0, ${star.brightness * 0.3})
+                  `,
+              }}
+            />
+            
+            {/* Star spikes/rays */}
+            {!isDayTime && (
+              <>
+                {/* Vertical ray */}
+                <div
+                  className="absolute bg-white opacity-60 transition-all duration-300"
+                  style={{
+                    width: '1px',
+                    height: `${Math.max(star.size * 16, 32)}px`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
+                    boxShadow: `0 0 ${Math.max(star.size * 2, 4)}px rgba(255, 255, 255, ${star.brightness * 0.8})`,
+                  }}
+                />
+                {/* Horizontal ray */}
+                <div
+                  className="absolute bg-white opacity-60 transition-all duration-300"
+                  style={{
+                    width: `${Math.max(star.size * 16, 32)}px`,
+                    height: '1px',
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
+                    boxShadow: `0 0 ${Math.max(star.size * 2, 4)}px rgba(255, 255, 255, ${star.brightness * 0.8})`,
+                  }}
+                />
+                {/* Diagonal rays */}
+                <div
+                  className="absolute bg-white opacity-40 transition-all duration-300"
+                  style={{
+                    width: '1px',
+                    height: `${Math.max(star.size * 12, 24)}px`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) rotate(45deg) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
+                    boxShadow: `0 0 ${Math.max(star.size * 1.5, 3)}px rgba(255, 255, 255, ${star.brightness * 0.6})`,
+                  }}
+                />
+                <div
+                  className="absolute bg-white opacity-40 transition-all duration-300"
+                  style={{
+                    width: '1px',
+                    height: `${Math.max(star.size * 12, 24)}px`,
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) rotate(-45deg) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
+                    boxShadow: `0 0 ${Math.max(star.size * 1.5, 3)}px rgba(255, 255, 255, ${star.brightness * 0.6})`,
+                  }}
+                />
+              </>
+            )}
+            
+            {/* Core highlight */}
+            <div
+              className="absolute rounded-full transition-all duration-300"
+              style={{
+                width: `${Math.max(star.size * 3, 6)}px`,
+                height: `${Math.max(star.size * 3, 6)}px`,
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) translate(-20%, -20%) ${hoveredStar === star.id ? 'scale(1.5)' : 'scale(1)'}`,
+                background: isDayTime 
+                  ? 'rgba(255, 255, 255, 0.9)'
+                  : 'rgba(255, 255, 255, 0.95)',
+                boxShadow: `0 0 ${Math.max(star.size * 2, 4)}px rgba(255, 255, 255, 0.8)`,
+              }}
+            />
+            
+            {/* Subtle twinkle animation */}
+            <div
+              className="absolute rounded-full animate-pulse"
+              style={{
+                width: `${Math.max(star.size * 6, 12)}px`,
+                height: `${Math.max(star.size * 6, 12)}px`,
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: isDayTime 
+                  ? 'rgba(135, 206, 250, 0.3)'
+                  : 'rgba(255, 255, 255, 0.2)',
+                animationDuration: `${2 + Math.random() * 3}s`,
+                animationDelay: `${Math.random() * 2}s`,
+              }}
+            />
+          </div>
         </div>
       ))}
     </div>
