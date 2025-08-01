@@ -8,6 +8,7 @@ import { AuthModal } from './components/AuthModal';
 import { PasswordResetPage } from './components/PasswordResetPage';
 import { UnifiedSearch } from './components/UnifiedSearch';
 import { SkySelector } from './components/SkySelector';
+import { HamburgerMenu } from './components/HamburgerMenu';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
 import { useAuthStore } from './store/useAuthStore';
@@ -391,56 +392,17 @@ function App() {
       )}
 
       {/* Navigation */}
-      <div className="fixed top-4 right-4 flex flex-col sm:flex-row gap-2 sm:gap-4 z-10">
-        {user ? (
-          <>
-            <button
-              onClick={handleSearchClick}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-            >
-              <Search size={20} />
-              <span className="hidden sm:inline">Search</span>
-            </button>
-            <button
-              onClick={() => setShowProfileModal(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-            >
-              <UserCircle size={20} />
-              <span className="hidden sm:inline">Profile</span>
-            </button>
-            {isAdmin && (
-              <button
-                onClick={() => setShowAdminPanel(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-              >
-                <Users size={20} />
-                <span className="hidden sm:inline">Users</span>
-              </button>
-            )}
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-            >
-              <PlusCircle size={20} />
-              <span className="hidden sm:inline">Create Star</span>
-            </button>
-            <button
-              onClick={() => signOut()}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-            >
-              <LogOut size={20} />
-              <span className="hidden sm:inline">Sign Out</span>
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-          >
-            <LogIn size={20} />
-            <span className="hidden sm:inline">Sign In</span>
-          </button>
-        )}
+      <div className="fixed top-4 right-4 z-10">
+        <HamburgerMenu
+          isAuthenticated={!!user}
+          isAdmin={isAdmin}
+          onProfileClick={() => setShowProfileModal(true)}
+          onSignOut={() => signOut()}
+          onSearchClick={handleSearchClick}
+          onAdminClick={() => setShowAdminPanel(true)}
+          onCreateStarClick={() => setIsModalOpen(true)}
+          onSignInClick={() => setIsAuthModalOpen(true)}
+        />
       </div>
 
       {/* Selected Star Message */}
