@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, UserCircle, LogOut, Search, Users, PlusCircle } from 'lucide-react';
+import { Menu, X, UserCircle, LogOut, Search, Users, PlusCircle, Settings } from 'lucide-react';
 
 interface HamburgerMenuProps {
   isAuthenticated: boolean;
@@ -11,6 +11,7 @@ interface HamburgerMenuProps {
   onAdminClick: () => void;
   onCreateStarClick: () => void;
   onSignInClick: () => void;
+  onSettingsClick: () => void;
 }
 
 export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
@@ -22,6 +23,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   onAdminClick,
   onCreateStarClick,
   onSignInClick,
+  onSettingsClick,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -65,6 +67,12 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
       label: 'Profile',
       action: onProfileClick,
       color: 'text-purple-400 hover:text-purple-300',
+    },
+    {
+      icon: Settings,
+      label: 'Settings',
+      action: onSettingsClick,
+      color: 'text-gray-400 hover:text-gray-300',
     },
     ...(isAdmin ? [{
       icon: Users,

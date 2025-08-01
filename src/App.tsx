@@ -9,6 +9,7 @@ import { PasswordResetPage } from './components/PasswordResetPage';
 import { UnifiedSearch } from './components/UnifiedSearch';
 import { SkySelector } from './components/SkySelector';
 import { HamburgerMenu } from './components/HamburgerMenu';
+import { SettingsModal } from './components/SettingsModal';
 import { useLocationTime } from './hooks/useLocationTime';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
@@ -42,6 +43,7 @@ function App() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { isDayTime, isLoading: timeLoading, error: timeError } = useLocationTime();
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
 
@@ -410,6 +412,16 @@ function App() {
         </div>
       )}
 
+
+    {/* Settings Modal */}
+    <AnimatePresence>
+      {showSettings && user && (
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+    </AnimatePresence>
       {/* Navigation */}
       <div className="fixed top-4 right-4 z-10">
         <HamburgerMenu
@@ -421,6 +433,7 @@ function App() {
           onAdminClick={() => setShowAdminPanel(true)}
           onCreateStarClick={() => setIsModalOpen(true)}
           onSignInClick={() => setIsAuthModalOpen(true)}
+          onSettingsClick={() => setShowSettings(true)}
         />
       </div>
 
