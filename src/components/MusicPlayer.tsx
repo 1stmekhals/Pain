@@ -558,7 +558,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
                     </div>
                   ))
                 )}
-              </div>
             </div>
           </motion.div>
         )}
