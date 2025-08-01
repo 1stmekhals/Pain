@@ -104,6 +104,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       
+      // Check if there's an active session before attempting to sign out
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      // If no session exists or there's an error getting the session, just clear local state
+      if (!session || sessionError) {
+        set({ user: null, loading: false });
+        return;
+      }
+      
       try {
         // Attempt to sign out from Supabase
         const { error } = await supabase.auth.signOut();
