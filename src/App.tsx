@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { StarrySky } from './components/StarrySky';
 import { CreateStarModal } from './components/CreateStarModal';
 import { MusicPlayer } from './components/MusicPlayer';
-import { DiaryPage } from './components/DiaryPage';
 import { ProfileModal } from './components/ProfileModal';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthModal } from './components/AuthModal';
 import { PasswordResetPage } from './components/PasswordResetPage';
+import { SkySelector } from './components/SkySelector';
+import { UserSearch } from './components/UserSearch';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
 import { useAuthStore } from './store/useAuthStore';
 import { supabase, checkSupabaseConnection, testNetworkConnectivity } from './lib/supabase';
-import { PlusCircle, LogIn, LogOut, X, Trash2, Book, UserCircle, Users, AlertCircle, RefreshCw, ExternalLink } from 'lucide-react';
+import { PlusCircle, LogIn, LogOut, X, Trash2, UserCircle, Users, AlertCircle, RefreshCw, ExternalLink, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
@@ -27,11 +28,12 @@ function App() {
   const [stars, setStars] = useState<Star[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStar, setSelectedStar] = useState<Star | null>(null);
+  const [currentSky, setCurrentSky] = useState<'general' | string>('general');
+  const [showUserSearch, setShowUserSearch] = useState(false);
   const { user, signOut, initialize } = useAuthStore();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showDiary, setShowDiary] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [userProfile, setUserProfile] = useState<Partial<Profile> | null>(null);
@@ -79,14 +81,14 @@ function App() {
       if (!target.closest('.star-message') && !target.closest('.interactive-star')) {
         setSelectedStar(null);
       }
-      if (!target.closest('.diary-page') && showDiary) {
-        setShowDiary(false);
+      if (!target.closest('.user-search') && showUserSearch) {
+        setShowUserSearch(false);
       }
     };
     
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showDiary, isConnected]);
+  }, [showUserSearch, isConnected]);
 
   useEffect(() => {
     if (!isConnected || !user) {
@@ -148,7 +150,7 @@ function App() {
     if (!isConnected) return;
 
     try {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('stars')
         .select(`
           *,
@@ -159,6 +161,14 @@ function App() {
           )
         `)
         .order('created_at', { ascending: false });
+
+      if (currentSky === 'general') {
+        query = query.eq('sky_type', 'general');
+      } else {
+        query = query.eq('sky_type', 'user').eq('profile_id', currentSky);
+      }
+
+      const { data, error: fetchError } = await query;
 
       if (fetchError) {
         if (fetchError.code === '42P01') {
@@ -182,7 +192,7 @@ function App() {
     }
   };
 
-  const handleCreateStar = async (message: string) => {
+  const handleCreateStar = async (starName: string, message: string) => {
     if (!isConnected) {
       setError('Unable to connect to the database. Please try again later.');
       return;
@@ -195,6 +205,18 @@ function App() {
       return;
     }
 
+    // Check if star name already exists
+    const { data: existingStar } = await supabase
+      .from('stars')
+      .select('id')
+      .eq('star_name', starName)
+      .single();
+
+    if (existingStar) {
+      setError('A star with this name already exists. Please choose a different name.');
+      return;
+    }
+
     try {
       let x, y;
       do {
@@ -203,7 +225,9 @@ function App() {
       } while (x > 70 && y < 30); // Avoid moon area
 
       const newStar = {
+        star_name: starName,
         message,
+        sky_type: currentSky === 'general' ? 'general' : 'user',
         x,
         y,
         size: Math.random() * 2 + 1,
@@ -229,6 +253,14 @@ function App() {
       setError('Failed to create star. Please try again.');
     }
   };
+
+  const handleSkyChange = (skyType: 'general' | string) => {
+    setCurrentSky(skyType);
+  };
+
+  useEffect(() => {
+    fetchStars();
+  }, [currentSky, isConnected]);
 
   const handleDeleteStar = async (starId: string) => {
     if (!isConnected || !user) return;
@@ -351,18 +383,18 @@ function App() {
         {user ? (
           <>
             <button
+              onClick={() => setShowUserSearch(!showUserSearch)}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
+            >
+              <Search size={20} />
+              <span className="hidden sm:inline">Search Users</span>
+            </button>
+            <button
               onClick={() => setShowProfileModal(true)}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
             >
               <UserCircle size={20} />
               <span className="hidden sm:inline">Profile</span>
-            </button>
-            <button
-              onClick={() => setShowDiary(!showDiary)}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
-            >
-              <Book size={20} />
-              <span className="hidden sm:inline">Diary</span>
             </button>
             {isAdmin && (
               <button
@@ -399,6 +431,26 @@ function App() {
         )}
       </div>
 
+      {/* Sky Selector */}
+      <SkySelector
+        currentSky={currentSky}
+        onSkyChange={handleSkyChange}
+        userProfile={userProfile}
+      />
+
+      {/* User Search */}
+      <AnimatePresence>
+        {showUserSearch && (
+          <UserSearch
+            onClose={() => setShowUserSearch(false)}
+            onUserSelect={(userId) => {
+              setCurrentSky(userId);
+              setShowUserSearch(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Selected Star Message */}
       <AnimatePresence>
         {selectedStar && (
@@ -421,6 +473,9 @@ function App() {
                 <p className="text-white text-base sm:text-lg font-medium leading-relaxed">
                   {selectedStar.message}
                 </p>
+                <div className="mt-2 text-blue-300 text-sm font-medium">
+                  ⭐ {selectedStar.star_name}
+                </div>
                 <div className="mt-2 text-gray-400 text-sm">
                   {selectedStar.profiles?.display_name && !selectedStar.profiles?.hide_display_name && (
                     <p>By: {selectedStar.profiles.display_name}</p>
@@ -471,12 +526,6 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Diary Page */}
-      <AnimatePresence>
-        {showDiary && user && (
-          <DiaryPage onClose={() => setShowDiary(false)} />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
