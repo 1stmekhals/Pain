@@ -104,14 +104,29 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      // If the error indicates the session is already missing/invalid, 
+      // we still want to clear the local state
+      if (error && 
+          !error.message.includes('session_not_found') && 
+          !error.message.includes('Auth session missing')) {
+        throw error;
+      }
+      
       set({ user: null, loading: false });
     } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to sign out', 
-        loading: false 
-      });
-      throw error;
+      // Only throw errors that aren't related to missing sessions
+      if (!error.message.includes('session_not_found') && 
+          !error.message.includes('Auth session missing')) {
+        set({ 
+          error: error.message || 'Failed to sign out', 
+          loading: false 
+        });
+        throw error;
+      } else {
+        // For session-related errors, just clear the local state
+        set({ user: null, loading: false });
+      }
     }
   },
   clearError: () => set({ error: null }),
