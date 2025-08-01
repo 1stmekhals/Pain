@@ -38,6 +38,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [showUserSearch, setShowUserSearch] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
