@@ -102,59 +102,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   signOut: async () => {
     try {
-      // Early return if user is already logged out locally
-      const currentState = useAuthStore.getState();
-      if (!currentState.user) {
-        set({ loading: false });
-        return;
-      }
-      
       set({ loading: true, error: null });
       
-      // Check if there's an active session before attempting to sign out
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      // If no session exists or there's an error getting the session, just clear local state
-      if (!session || sessionError) {
-        set({ user: null, loading: false });
-        return;
-      }
-      
-      // Check if session is already expired
-      const now = new Date().getTime();
-      const expiresAt = session.expires_at ? new Date(session.expires_at * 1000).getTime() : 0;
-      
-      if (expiresAt > 0 && now >= expiresAt) {
-        // Session is expired, just clear local state without making network request
-        set({ user: null, loading: false });
-        return;
-      }
-      
-      try {
-        // Attempt to sign out from Supabase
-        const { error } = await supabase.auth.signOut();
-        
-        // Only log truly unexpected errors (not session-related ones)
-        if (error && 
-            !error.message.includes('session_not_found') && 
-            !error.message.includes('Auth session missing') &&
-            error.status !== 403) {
-          console.warn('Unexpected sign out error:', error);
-        }
-      } catch (error: any) {
-        // Catch and silently handle expected session errors
-        if (error.message?.includes('session_not_found') || 
-            error.message?.includes('Auth session missing') ||
-            error.status === 403) {
-          // These are expected when session is already invalid - ignore silently
-        } else {
-          console.warn('Unexpected sign out error:', error);
-        }
-      }
-      
-      set({ user: null, loading: false });
+      // Attempt to sign out - ignore expected session errors
+      await supabase.auth.signOut();
     } catch (error: any) {
-      // Always clear local state regardless of any errors
+      // Silently handle expected session errors (session_not_found, expired sessions, etc.)
+      // These are normal when the session is already invalid on the server
+    } finally {
+      // Always clear local state regardless of server response
       set({ user: null, loading: false });
     }
   },
