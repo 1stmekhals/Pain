@@ -179,13 +179,161 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           {/* Moon for night sky */}
           <div className="absolute right-10 top-10 w-24 h-24">
             <div className="relative w-full h-full">
+              {/* Moon's atmospheric glow */}
+              <div
+                className="absolute w-full h-full rounded-full opacity-30"
+                style={{
+                  background: 'radial-gradient(circle, rgba(220, 220, 255, 0.4) 0%, rgba(180, 180, 220, 0.2) 40%, transparent 70%)',
+                  transform: 'scale(1.8)',
+                  filter: 'blur(8px)',
+                }}
+              />
+              
+              {/* Main moon body */}
               <div
                 className="w-full h-full rounded-full"
                 style={{
-                  background: 'radial-gradient(circle at 35% 35%, #f5f5f5 0%, #e0e0e0 30%, #c0c0c0 60%, #a0a0a0 100%)',
-                  boxShadow: '0 0 15px rgba(245, 245, 245, 0.4), inset -8px -8px 15px rgba(0, 0, 0, 0.2)',
+                  background: `
+                    radial-gradient(ellipse at 30% 25%, rgba(255, 255, 255, 0.9) 0%, transparent 25%),
+                    radial-gradient(ellipse at 65% 40%, rgba(240, 240, 240, 0.6) 0%, transparent 20%),
+                    radial-gradient(ellipse at 45% 70%, rgba(220, 220, 220, 0.4) 0%, transparent 15%),
+                    radial-gradient(ellipse at 20% 60%, rgba(200, 200, 200, 0.3) 0%, transparent 12%),
+                    radial-gradient(ellipse at 75% 25%, rgba(210, 210, 210, 0.3) 0%, transparent 10%),
+                    radial-gradient(circle at 35% 30%, #f8f8f8 0%, #e8e8e8 25%, #d0d0d0 50%, #b8b8b8 75%, #a0a0a0 100%)
+                  `,
+                  boxShadow: `
+                    0 0 20px rgba(245, 245, 255, 0.6),
+                    0 0 40px rgba(220, 220, 255, 0.3),
+                    inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+                    inset 5px 5px 15px rgba(255, 255, 255, 0.2)
+                  `,
                 }}
-              />
+              >
+                {/* Lunar craters and surface features */}
+                <div className="absolute inset-0 rounded-full overflow-hidden">
+                  {/* Large crater */}
+                  <div
+                    className="absolute rounded-full opacity-40"
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      left: '45%',
+                      top: '35%',
+                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 40%, transparent 70%)',
+                      boxShadow: 'inset 2px 2px 4px rgba(0, 0, 0, 0.3)',
+                    }}
+                  />
+                  
+                  {/* Medium craters */}
+                  <div
+                    className="absolute rounded-full opacity-30"
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      left: '25%',
+                      top: '50%',
+                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 80%)',
+                      boxShadow: 'inset 1px 1px 3px rgba(0, 0, 0, 0.2)',
+                    }}
+                  />
+                  
+                  <div
+                    className="absolute rounded-full opacity-25"
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      left: '65%',
+                      top: '60%',
+                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 80%)',
+                      boxShadow: 'inset 1px 1px 2px rgba(0, 0, 0, 0.2)',
+                    }}
+                  />
+                  
+                  {/* Small craters */}
+                  <div
+                    className="absolute rounded-full opacity-20"
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      left: '35%',
+                      top: '65%',
+                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, transparent 70%)',
+                      boxShadow: 'inset 1px 1px 1px rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
+                  
+                  <div
+                    className="absolute rounded-full opacity-15"
+                    style={{
+                      width: '4px',
+                      height: '4px',
+                      left: '55%',
+                      top: '25%',
+                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, transparent 70%)',
+                    }}
+                  />
+                  
+                  {/* Mare (dark patches) */}
+                  <div
+                    className="absolute opacity-20"
+                    style={{
+                      width: '20px',
+                      height: '15px',
+                      left: '20%',
+                      top: '25%',
+                      background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 60%, transparent 100%)',
+                      borderRadius: '60% 40% 70% 30%',
+                      transform: 'rotate(-15deg)',
+                    }}
+                  />
+                  
+                  <div
+                    className="absolute opacity-15"
+                    style={{
+                      width: '16px',
+                      height: '12px',
+                      left: '50%',
+                      top: '45%',
+                      background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 70%, transparent 100%)',
+                      borderRadius: '50% 60% 40% 70%',
+                      transform: 'rotate(25deg)',
+                    }}
+                  />
+                  
+                  {/* Bright highlands */}
+                  <div
+                    className="absolute opacity-30"
+                    style={{
+                      width: '14px',
+                      height: '10px',
+                      left: '60%',
+                      top: '20%',
+                      background: 'radial-gradient(ellipse, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 60%, transparent 100%)',
+                      borderRadius: '70% 30% 60% 40%',
+                      transform: 'rotate(45deg)',
+                    }}
+                  />
+                </div>
+              </div>
+              
+              {/* Subtle light rays from moon */}
+              <div className="absolute inset-0">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={`moon-ray-${i}`}
+                    className="absolute opacity-10"
+                    style={{
+                      width: '1px',
+                      height: '60px',
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, transparent 100%)',
+                      left: '50%',
+                      top: '50%',
+                      transformOrigin: '0 0',
+                      transform: `translate(-50%, -50%) rotate(${i * 45}deg)`,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </>
