@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Globe, User } from 'lucide-react';
 
 interface SkySelectorProps {
@@ -20,11 +19,7 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
 
   return (
     <div className="fixed top-4 left-4 z-10">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg p-3 border border-gray-700"
-      >
+      <div className="bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg p-3 border border-gray-700">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {currentSky === 'general' ? (
@@ -63,7 +58,7 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

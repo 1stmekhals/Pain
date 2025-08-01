@@ -108,7 +108,7 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
         initial={{ scale: 0.9, opacity: 0, y: -20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: -20 }}
-        className="bg-gray-900 w-full max-w-md rounded-xl shadow-2xl border border-gray-700"
+        className="bg-gray-900 w-full max-w-md rounded-xl shadow-2xl border border-gray-700 unified-search"
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 border-b border-gray-700">

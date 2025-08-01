@@ -81,14 +81,11 @@ function App() {
       if (!target.closest('.star-message') && !target.closest('.interactive-star')) {
         setSelectedStar(null);
       }
-      if (!target.closest('.unified-search') && showSearch) {
-        setShowSearch(false);
-      }
     };
     
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showSearch, isConnected]);
+  }, [isConnected]);
 
   useEffect(() => {
     if (!isConnected || !user) {
@@ -316,6 +313,15 @@ function App() {
     setIsRetrying(false);
   };
 
+  const handleSearchClick = () => {
+    console.log('Search button clicked, current showSearch:', showSearch);
+    setShowSearch(true);
+  };
+
+  const handleSearchClose = () => {
+    console.log('Search modal closing');
+    setShowSearch(false);
+  };
   if (!isConnected) {
     const isCorsError = connectionError?.includes('CORS Configuration Required');
     
@@ -389,7 +395,7 @@ function App() {
         {user ? (
           <>
             <button
-              onClick={() => setShowSearch(!showSearch)}
+              onClick={handleSearchClick}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 text-sm sm:text-base"
             >
               <Search size={20} />
@@ -512,17 +518,17 @@ function App() {
       <AnimatePresence>
         {showSearch && user && (
           <UnifiedSearch
-            onClose={() => setShowSearch(false)}
+            onClose={handleSearchClose}
             onStarSelect={(star) => {
               setSelectedStar(star);
-              setShowSearch(false);
+              handleSearchClose();
             }}
             onUserSelect={(userId) => {
               // Switch to user sky when selecting a user
               if (userId === user?.id) {
                 setCurrentSky('user');
               }
-              setShowSearch(false);
+              handleSearchClose();
             }}
           />
         )}
