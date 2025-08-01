@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Music, Upload, AlertCircle } from 'lucide-react';
+import { Volume2, VolumeX, Music, Upload, AlertCircle, SkipForward, Play, Pause, List, X } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { supabase } from '../lib/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MusicPlayerProps {
   className?: string;
@@ -11,13 +12,18 @@ interface BackgroundMusic {
   id: string;
   url: string;
   title: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
   const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showPlaylist, setShowPlaylist] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuthStore();
-  const [currentMusic, setCurrentMusic] = useState<BackgroundMusic | null>(null);
+  const [playlist, setPlaylist] = useState<BackgroundMusic[]>([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,13 +73,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
           table: 'background_music',
         },
         () => {
-          retryCountRef.current = 0; // Reset retry count on subscription events
-          fetchCurrentMusic();
+          retryCountRef.current = 0;
+          fetchPlaylist();
         }
       )
       .subscribe();
 
-    fetchCurrentMusic();
+    fetchPlaylist();
 
     return () => {
       subscription.unsubscribe();
@@ -93,48 +99,42 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
       return;
     }
 
-    // Exponential backoff with jitter
     const delay = Math.min(
       BASE_RETRY_DELAY * Math.pow(2, retryCountRef.current) + Math.random() * 1000,
-      30000 // Max delay of 30 seconds
+      30000
     );
 
     retryTimeoutRef.current = setTimeout(() => {
       retryCountRef.current++;
-      fetchCurrentMusic();
+      fetchPlaylist();
     }, delay);
   };
 
-  const fetchCurrentMusic = async () => {
+  const fetchPlaylist = async () => {
     try {
       setFetchError(null);
       
-      // Check if background_music table exists first
       const { data, error } = await supabase
         .from('background_music')
         .select('*')
-        .eq('is_active', true)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // No data found, not an error
-          setCurrentMusic(null);
-          retryCountRef.current = 0; // Reset retry count on successful response
+          setPlaylist([]);
+          retryCountRef.current = 0;
           return;
         }
         
         if (error.code === '42P01') {
-          // Table doesn't exist
           console.warn('Background music table does not exist yet');
-          setCurrentMusic(null);
+          setPlaylist([]);
           setFetchError('Background music feature not yet configured');
           return;
         }
 
-        console.error('Error fetching background music:', error);
+        console.error('Error fetching playlist:', error);
         
-        // Check if it's a CORS or network error
         const errorMessage = error.message?.toLowerCase() || '';
         if (errorMessage.includes('cors') || errorMessage.includes('fetch')) {
           setFetchError('Connection issue. Please check your Supabase CORS settings.');
@@ -146,54 +146,36 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         return;
       }
 
-      if (data) {
-        // Ensure the URL uses HTTPS
-        const secureUrl = data.url.replace(/^http:/, 'https:');
+      if (data && data.length > 0) {
+        const validTracks = [];
         
-        // Test if the audio URL is accessible
-        try {
-          const response = await fetch(secureUrl, { method: 'HEAD' });
-          if (!response.ok) {
-            throw new Error('Audio file not accessible');
-          }
-        } catch (err: any) {
-          console.error('Error checking audio URL:', err);
+        for (const track of data) {
+          const secureUrl = track.url.replace(/^http:/, 'https:');
           
-          // Check if it's a CORS error
-          if (err.message?.includes('cors') || err.message?.includes('fetch')) {
-            setFetchError('Audio file blocked by CORS policy');
-          } else {
-            setFetchError('Unable to access audio file');
+          try {
+            const response = await fetch(secureUrl, { method: 'HEAD' });
+            if (response.ok) {
+              validTracks.push({ ...track, url: secureUrl });
+            }
+          } catch (err) {
+            console.warn(`Track ${track.title} is not accessible:`, err);
           }
-          
-          retryFetch();
-          return;
         }
 
-        setCurrentMusic({ ...data, url: secureUrl });
-        retryCountRef.current = 0; // Reset retry count on successful fetch
+        setPlaylist(validTracks);
+        retryCountRef.current = 0;
         
-        if (audioRef.current) {
-          try {
-            audioRef.current.src = secureUrl;
-            await audioRef.current.load();
-            if (!isMuted) {
-              await audioRef.current.play();
-            }
-          } catch (mediaError: any) {
-            console.error('Error loading audio:', mediaError);
-            setFetchError('Unable to load audio file');
-            retryFetch();
-          }
+        // If we have tracks and audio element, load the first track
+        if (validTracks.length > 0 && audioRef.current) {
+          loadTrack(0, validTracks);
         }
       } else {
-        setCurrentMusic(null);
-        retryCountRef.current = 0; // Reset retry count when no music is found
+        setPlaylist([]);
+        retryCountRef.current = 0;
       }
     } catch (err: any) {
-      console.error('Error fetching background music:', err);
+      console.error('Error fetching playlist:', err);
       
-      // Provide more specific error messages
       const errorMessage = err.message?.toLowerCase() || '';
       if (errorMessage.includes('cors') || errorMessage.includes('fetch')) {
         setFetchError('CORS configuration required. Please check your Supabase settings.');
@@ -205,21 +187,105 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
     }
   };
 
-  const toggleMute = async () => {
-    if (audioRef.current) {
-      try {
-        audioRef.current.muted = !isMuted;
-        setIsMuted(!isMuted);
-        if (!isMuted) {
-          await audioRef.current.pause();
-        } else if (currentMusic) {
-          await audioRef.current.play();
-        }
-        setFetchError(null);
-      } catch (err) {
-        console.error('Error toggling audio:', err);
-        setFetchError('Unable to play audio');
+  const loadTrack = async (index: number, trackList = playlist) => {
+    if (!audioRef.current || !trackList[index]) return;
+
+    try {
+      audioRef.current.src = trackList[index].url;
+      await audioRef.current.load();
+      setCurrentTrackIndex(index);
+      
+      if (!isMuted && isPlaying) {
+        await audioRef.current.play();
       }
+    } catch (error) {
+      console.error('Error loading track:', error);
+      setFetchError('Unable to load audio file');
+    }
+  };
+
+  const playNextTrack = () => {
+    if (playlist.length === 0) return;
+    
+    // Random next track
+    let nextIndex;
+    if (playlist.length === 1) {
+      nextIndex = 0;
+    } else {
+      do {
+        nextIndex = Math.floor(Math.random() * playlist.length);
+      } while (nextIndex === currentTrackIndex);
+    }
+    
+    loadTrack(nextIndex);
+  };
+
+  const togglePlayPause = async () => {
+    if (!audioRef.current || playlist.length === 0) return;
+
+    try {
+      if (isPlaying) {
+        await audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        if (isMuted) {
+          setIsMuted(false);
+          audioRef.current.muted = false;
+        }
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+      setFetchError(null);
+    } catch (err) {
+      console.error('Error toggling playback:', err);
+      setFetchError('Unable to play audio');
+    }
+  };
+
+  const toggleMute = async () => {
+    if (!audioRef.current) return;
+
+    try {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+      
+      if (!isMuted) {
+        setIsPlaying(false);
+      } else if (playlist.length > 0) {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+      setFetchError(null);
+    } catch (err) {
+      console.error('Error toggling audio:', err);
+      setFetchError('Unable to play audio');
+    }
+  };
+
+  const selectTrack = (index: number) => {
+    loadTrack(index);
+    setShowPlaylist(false);
+    if (!isMuted) {
+      setIsPlaying(true);
+    }
+  };
+
+  const deleteTrack = async (trackId: string) => {
+    if (!isAdmin) return;
+
+    try {
+      const { error } = await supabase
+        .from('background_music')
+        .delete()
+        .eq('id', trackId);
+
+      if (error) throw error;
+
+      // Refresh playlist
+      await fetchPlaylist();
+    } catch (error: any) {
+      console.error('Error deleting track:', error);
+      setUploadError('Failed to delete track');
     }
   };
 
@@ -258,13 +324,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         .from('background-music')
         .getPublicUrl(`music/${fileName}`);
 
-      // Ensure HTTPS URL
       const secureUrl = publicUrl.replace(/^http:/, 'https:');
-
-      await supabase
-        .from('background_music')
-        .update({ is_active: false })
-        .eq('is_active', true);
 
       const { error: insertError } = await supabase
         .from('background_music')
@@ -272,7 +332,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
           {
             url: secureUrl,
             title: file.name,
-            is_active: true
+            is_active: false
           }
         ]);
 
@@ -282,11 +342,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         fileInputRef.current.value = '';
       }
       
-      retryCountRef.current = 0; // Reset retry count after successful upload
+      retryCountRef.current = 0;
+      await fetchPlaylist();
     } catch (error: any) {
       console.error('Error uploading music:', error);
       
-      // Provide more specific error messages
       const errorMessage = error.message?.toLowerCase() || '';
       if (errorMessage.includes('cors') || errorMessage.includes('fetch')) {
         setUploadError('CORS configuration required. Please check your Supabase settings.');
@@ -300,70 +360,209 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
     }
   };
 
+  // Handle track end - play next random track
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTrackEnd = () => {
+      playNextTrack();
+    };
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener('ended', handleTrackEnd);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    return () => {
+      audio.removeEventListener('ended', handleTrackEnd);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, [playlist, currentTrackIndex]);
+
+  const currentTrack = playlist[currentTrackIndex];
+
   return (
-    <div className={`fixed bottom-4 left-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 bg-gray-900 bg-opacity-80 p-3 rounded-lg sm:rounded-full backdrop-blur-sm ${className}`}>
-      {isAdmin && (
-        <div className="relative">
-          <label className={`
-            cursor-pointer hover:opacity-80 transition-opacity 
-            flex items-center gap-2 px-3 py-1.5 
-            ${isUploading ? 'bg-gray-600' : 'bg-indigo-600'} 
-            rounded-full text-white text-sm
-          `}>
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {isUploading ? 'Uploading...' : 'Upload Music'}
-            </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="audio/*"
-              className="hidden"
-              onChange={handleFileUpload}
-              disabled={isUploading}
-            />
-          </label>
-          {uploadError && (
-            <div className="absolute top-full mt-2 left-0 right-0 text-center whitespace-nowrap">
-              <span className="text-red-400 text-xs bg-gray-800 px-2 py-1 rounded">
-                {uploadError}
+    <>
+      <div className={`fixed bottom-4 left-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 bg-gray-900 bg-opacity-80 p-3 rounded-lg sm:rounded-full backdrop-blur-sm ${className}`}>
+        {isAdmin && (
+          <div className="relative">
+            <label className={`
+              cursor-pointer hover:opacity-80 transition-opacity 
+              flex items-center gap-2 px-3 py-1.5 
+              ${isUploading ? 'bg-gray-600' : 'bg-indigo-600'} 
+              rounded-full text-white text-sm
+            `}>
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">
+                {isUploading ? 'Uploading...' : 'Upload Music'}
               </span>
-            </div>
-          )}
-        </div>
-      )}
-      
-      <button
-        onClick={toggleMute}
-        className="text-white hover:opacity-80 transition-opacity"
-        disabled={!currentMusic}
-      >
-        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-      </button>
-
-      {currentMusic ? (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/*"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+              />
+            </label>
+            {uploadError && (
+              <div className="absolute top-full mt-2 left-0 right-0 text-center whitespace-nowrap">
+                <span className="text-red-400 text-xs bg-gray-800 px-2 py-1 rounded">
+                  {uploadError}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+        
         <div className="flex items-center gap-2">
-          <Music className="w-4 h-4 text-white opacity-60" />
-          <span className="text-white text-sm truncate max-w-[120px] sm:max-w-[150px]">
-            {currentMusic.title}
-          </span>
-        </div>
-      ) : isAdmin ? (
-        <span className="text-gray-400 text-sm">Upload music to begin</span>
-      ) : (
-        <span className="text-gray-400 text-sm">No music playing</span>
-      )}
+          <button
+            onClick={toggleMute}
+            className="text-white hover:opacity-80 transition-opacity"
+            disabled={playlist.length === 0}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </button>
 
-      {fetchError && (
-        <div className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3 text-red-400" />
-          <span className="text-red-400 text-xs bg-gray-800 px-2 py-1 rounded">
-            {fetchError}
-          </span>
-        </div>
-      )}
+          <button
+            onClick={togglePlayPause}
+            className="text-white hover:opacity-80 transition-opacity"
+            disabled={playlist.length === 0}
+          >
+            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </button>
 
-      <audio ref={audioRef} loop muted className="hidden" />
-    </div>
+          <button
+            onClick={playNextTrack}
+            className="text-white hover:opacity-80 transition-opacity"
+            disabled={playlist.length === 0}
+          >
+            <SkipForward className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={() => setShowPlaylist(!showPlaylist)}
+            className="text-white hover:opacity-80 transition-opacity"
+            disabled={playlist.length === 0}
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
+
+        {currentTrack ? (
+          <div className="flex items-center gap-2">
+            <Music className="w-4 h-4 text-white opacity-60" />
+            <span className="text-white text-sm truncate max-w-[120px] sm:max-w-[150px]">
+              {currentTrack.title}
+            </span>
+          </div>
+        ) : playlist.length > 0 ? (
+          <span className="text-gray-400 text-sm">Select a track</span>
+        ) : isAdmin ? (
+          <span className="text-gray-400 text-sm">Upload music to begin</span>
+        ) : (
+          <span className="text-gray-400 text-sm">No music available</span>
+        )}
+
+        {fetchError && (
+          <div className="flex items-center gap-1">
+            <AlertCircle className="w-3 h-3 text-red-400" />
+            <span className="text-red-400 text-xs bg-gray-800 px-2 py-1 rounded">
+              {fetchError}
+            </span>
+          </div>
+        )}
+
+        <audio ref={audioRef} loop={false} muted className="hidden" />
+      </div>
+
+      {/* Playlist Modal */}
+      <AnimatePresence>
+        {showPlaylist && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowPlaylist(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 w-full max-w-md rounded-xl shadow-2xl border border-gray-700"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="p-4 border-b border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Music className="w-5 h-5 text-purple-400" />
+                    <h2 className="text-lg font-semibold text-white">Playlist</h2>
+                    <span className="text-gray-400 text-sm">({playlist.length} tracks)</span>
+                  </div>
+                  <button
+                    onClick={() => setShowPlaylist(false)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="max-h-64 overflow-y-auto">
+                {playlist.length === 0 ? (
+                  <div className="p-4 text-center text-gray-400">
+                    No tracks available
+                  </div>
+                ) : (
+                  playlist.map((track, index) => (
+                    <div
+                      key={track.id}
+                      className={`flex items-center justify-between p-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0 ${
+                        index === currentTrackIndex ? 'bg-gray-800' : ''
+                      }`}
+                    >
+                      <button
+                        onClick={() => selectTrack(index)}
+                        className="flex-1 text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${
+                            index === currentTrackIndex ? 'bg-purple-400' : 'bg-gray-600'
+                          }`} />
+                          <div>
+                            <div className={`font-medium ${
+                              index === currentTrackIndex ? 'text-purple-400' : 'text-white'
+                            }`}>
+                              {track.title}
+                            </div>
+                            <div className="text-gray-400 text-xs">
+                              {new Date(track.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                      
+                      {isAdmin && (
+                        <button
+                          onClick={() => deleteTrack(track.id)}
+                          className="text-red-400 hover:text-red-300 transition-colors p-1"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
