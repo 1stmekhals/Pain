@@ -223,10 +223,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           
           {/* Cosmic gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
-            className="mx-auto mb-4"
-          >
-            <X size={24} />
-          </button>
           
           {mode === 'forgot' && (
             <button
