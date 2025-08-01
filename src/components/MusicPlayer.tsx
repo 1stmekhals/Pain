@@ -40,14 +40,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
           .from('admin_users')
           .select('id')
           .eq('email', user.email)
-          .single();
+          .maybeSingle();
 
         if (error) {
-          if (error.code === 'PGRST116') {
-            // No admin record found - user is not admin
-            setIsAdmin(false);
-            return;
-          }
           console.error('Error checking admin status:', error);
           setIsAdmin(false);
           return;
