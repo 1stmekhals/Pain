@@ -9,6 +9,7 @@ interface UnifiedSearchProps {
   onClose: () => void;
   onUserSelect?: (userId: string) => void;
   onStarSelect?: (star: StarType) => void;
+  onUserSkyView?: (userId: string) => void;
 }
 
 interface SearchResult {
@@ -20,6 +21,7 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
   onClose,
   onUserSelect,
   onStarSelect,
+  onUserSkyView,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -88,6 +90,8 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
   const handleResultClick = (result: SearchResult) => {
     if (result.type === 'user' && onUserSelect) {
       onUserSelect((result.data as Profile).id);
+    } else if (result.type === 'user' && onUserSkyView) {
+      onUserSkyView((result.data as Profile).id);
     } else if (result.type === 'star' && onStarSelect) {
       onStarSelect(result.data as StarType);
     }

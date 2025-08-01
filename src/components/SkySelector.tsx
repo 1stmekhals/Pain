@@ -6,6 +6,7 @@ interface SkySelectorProps {
   onSkyChange: (skyType: 'general' | 'user') => void;
   isAuthenticated: boolean;
   isDayTime?: boolean;
+  viewingUserId?: string | null;
 }
 
 export const SkySelector: React.FC<SkySelectorProps> = ({
@@ -13,9 +14,13 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
   onSkyChange,
   isAuthenticated,
   isDayTime = false,
+  viewingUserId,
 }) => {
   const getSkyDisplayName = () => {
     if (currentSky === 'general') return 'General Sky';
+    if (viewingUserId) {
+      return 'User Sky';
+    }
     return 'My Sky';
   };
 
@@ -63,7 +68,7 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
-                My Sky
+                {viewingUserId ? 'User Sky' : 'My Sky'}
               </button>
             )}
           </div>

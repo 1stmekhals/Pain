@@ -43,6 +43,7 @@ function App() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const { isDayTime, isLoading: timeLoading, error: timeError } = useLocationTime();
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -165,7 +166,8 @@ function App() {
       if (currentSky === 'general') {
         query = query.eq('sky_type', 'general');
       } else if (currentSky === 'user' && user) {
-        query = query.eq('sky_type', 'user').eq('profile_id', user.id);
+        const targetUserId = viewingUserId || user.id;
+        query = query.eq('sky_type', 'user').eq('profile_id', targetUserId);
       }
 
       const { data, error: fetchError } = await query
@@ -198,7 +200,7 @@ function App() {
     if (isConnected) {
       fetchStars();
     }
-  }, [currentSky, user, isConnected]);
+  }, [currentSky, user, isConnected, viewingUserId]);
 
   const handleCreateStar = async (starName: string, message: string): Promise<void> => {
     if (!isConnected) {
@@ -325,6 +327,12 @@ function App() {
     console.log('Search modal closing');
     setShowSearch(false);
   };
+
+  const handleUserSkyView = (userId: string) => {
+    setViewingUserId(userId);
+    setCurrentSky('user');
+    setShowSearch(false);
+  };
   if (!isConnected) {
     const isCorsError = connectionError?.includes('CORS Configuration Required');
     
@@ -382,9 +390,17 @@ function App() {
       {/* Sky Selector */}
       <SkySelector
         currentSky={currentSky}
-        onSkyChange={setCurrentSky}
+        onSkyChange={(skyType) => {
+          setCurrentSky(skyType);
+          if (skyType === 'general') {
+            setViewingUserId(null);
+          } else if (skyType === 'user' && user) {
+            setViewingUserId(user.id);
+          }
+        }}
         isAuthenticated={!!user}
         isDayTime={isDayTime}
+        viewingUserId={viewingUserId}
       />
 
       {/* Error Message */}
@@ -488,13 +504,7 @@ function App() {
               setSelectedStar(star);
               handleSearchClose();
             }}
-            onUserSelect={(userId) => {
-              // Switch to user sky when selecting a user
-              if (userId === user?.id) {
-                setCurrentSky('user');
-              }
-              handleSearchClose();
-            }}
+            onUserSkyView={handleUserSkyView}
           />
         )}
       </AnimatePresence>
