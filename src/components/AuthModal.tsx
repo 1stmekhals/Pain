@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { supabase } from '../lib/supabase';
+import { Logo } from './Logo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -222,10 +223,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           
           {/* Cosmic gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
-          
-          <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10"
+            className="mx-auto mb-4"
           >
             <X size={24} />
           </button>
@@ -551,13 +549,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         }}
                         className="w-full py-3 border-2 border-purple-500 text-purple-400 rounded-xl hover:bg-purple-500/10 transition-all duration-200 font-medium backdrop-blur-sm"
                       >
-                        Sign In Instead
-                      </button>
-                    </>
-                  )}
-                </div>
-              </motion.form>
-            )}
+            <Logo size={64} showText={false} />
           </AnimatePresence>
         </div>
       </motion.div>
