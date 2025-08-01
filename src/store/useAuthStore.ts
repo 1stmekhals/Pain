@@ -120,6 +120,16 @@ export const useAuthStore = create<AuthState>((set) => ({
         return;
       }
       
+      // Check if session is already expired
+      const now = new Date().getTime();
+      const expiresAt = session.expires_at ? new Date(session.expires_at * 1000).getTime() : 0;
+      
+      if (expiresAt > 0 && now >= expiresAt) {
+        // Session is expired, just clear local state without making network request
+        set({ user: null, loading: false });
+        return;
+      }
+      
       try {
         // Attempt to sign out from Supabase
         const { error } = await supabase.auth.signOut();
