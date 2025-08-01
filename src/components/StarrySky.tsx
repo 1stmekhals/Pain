@@ -126,6 +126,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick }) => {
             left: `${star.x}%`,
             top: `${star.y}%`,
             zIndex: hoveredStar === star.id ? 10 : 1,
+            transform: 'translate(-50%, -50%)', // Center the star on its coordinates
           }}
           onClick={(e) => {
             e.stopPropagation();
@@ -138,13 +139,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick }) => {
           <div
             className="rounded-full transition-transform duration-200"
             style={{
-              width: `${star.size * 4}px`,
-              height: `${star.size * 4}px`,
+              width: `${Math.max(star.size * 6, 12)}px`,
+              height: `${Math.max(star.size * 6, 12)}px`,
               background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #fff8dc 40%, #ffd700 100%)',
               boxShadow: `
-                0 0 ${star.size * 2}px rgba(255, 255, 255, ${star.brightness}),
-                0 0 ${star.size * 4}px rgba(255, 255, 255, ${star.brightness * 0.6}),
-                0 0 ${star.size * 6}px rgba(255, 215, 0, ${star.brightness * 0.4})
+                0 0 ${Math.max(star.size * 3, 6)}px rgba(255, 255, 255, ${star.brightness}),
+                0 0 ${Math.max(star.size * 6, 12)}px rgba(255, 255, 255, ${star.brightness * 0.6}),
+                0 0 ${Math.max(star.size * 9, 18)}px rgba(255, 215, 0, ${star.brightness * 0.4})
               `,
               transform: hoveredStar === star.id ? 'scale(1.3)' : 'scale(1)',
             }}

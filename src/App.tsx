@@ -168,8 +168,7 @@ function App() {
         query = query.eq('sky_type', 'user').eq('profile_id', user.id);
       }
 
-      const { data, error: fetchError } = await supabase
-        query
+      const { data, error: fetchError } = await query
         .order('created_at', { ascending: false });
 
       if (fetchError) {
@@ -217,9 +216,13 @@ function App() {
     try {
       let x, y;
       do {
-        x = Math.random() * 90 + 5;
-        y = Math.random() * 70 + 5;
-      } while (x > 70 && y < 30); // Avoid moon area
+        x = Math.random() * 80 + 10; // 10% to 90% from left
+        y = Math.random() * 60 + 20; // 20% to 80% from top
+      } while (
+        (x > 75 && y < 35) || // Avoid moon area (top-right)
+        (x < 25 && y < 25) || // Avoid sky selector area (top-left)
+        (x > 75 && y > 75)    // Avoid bottom-right corner
+      );
 
       const newStar = {
         star_name: starName,
