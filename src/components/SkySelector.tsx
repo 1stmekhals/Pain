@@ -1,23 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Globe, User } from 'lucide-react';
-import { Profile } from '../types/profile';
 
 interface SkySelectorProps {
-  currentSky: 'general' | string;
-  onSkyChange: (skyType: 'general' | string) => void;
-  userProfile: Partial<Profile> | null;
+  currentSky: 'general' | 'user';
+  onSkyChange: (skyType: 'general' | 'user') => void;
+  isAuthenticated: boolean;
 }
 
 export const SkySelector: React.FC<SkySelectorProps> = ({
   currentSky,
   onSkyChange,
-  userProfile,
+  isAuthenticated,
 }) => {
   const getSkyDisplayName = () => {
     if (currentSky === 'general') return 'General Sky';
-    if (currentSky === userProfile?.id) return 'My Sky';
-    return 'User Sky';
+    return 'My Sky';
   };
 
   return (
@@ -51,11 +49,11 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
               General
             </button>
             
-            {userProfile && (
+            {isAuthenticated && (
               <button
-                onClick={() => onSkyChange(userProfile.id!)}
+                onClick={() => onSkyChange('user')}
                 className={`px-3 py-1 rounded-full text-xs transition-all ${
-                  currentSky === userProfile.id
+                  currentSky === 'user'
                     ? 'bg-purple-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}

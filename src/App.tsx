@@ -7,6 +7,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { AuthModal } from './components/AuthModal';
 import { PasswordResetPage } from './components/PasswordResetPage';
 import { UnifiedSearch } from './components/UnifiedSearch';
+import { SkySelector } from './components/SkySelector';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
 import { useAuthStore } from './store/useAuthStore';
@@ -27,6 +28,7 @@ function App() {
   const [stars, setStars] = useState<Star[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStar, setSelectedStar] = useState<Star | null>(null);
+  const [currentSky, setCurrentSky] = useState<'general' | 'user'>('general');
   const { user, signOut, initialize } = useAuthStore();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,6 @@ function App() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-
   useEffect(() => {
     const checkConnection = async () => {
       setIsRetrying(true);
@@ -148,7 +149,7 @@ function App() {
     if (!isConnected) return;
 
     try {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('stars')
         .select(`
           *,
@@ -157,7 +158,17 @@ function App() {
             display_name,
             hide_display_name
           )
-        `)
+        `);
+
+      // Filter by sky type
+      if (currentSky === 'general') {
+        query = query.eq('sky_type', 'general');
+      } else if (currentSky === 'user' && user) {
+        query = query.eq('sky_type', 'user').eq('profile_id', user.id);
+      }
+
+      const { data, error: fetchError } = await supabase
+        query
         .order('created_at', { ascending: false });
 
       if (fetchError) {
@@ -181,6 +192,13 @@ function App() {
       setError('Failed to load stars. Please try again.');
     }
   };
+
+  // Refetch stars when sky changes
+  useEffect(() => {
+    if (isConnected) {
+      fetchStars();
+    }
+  }, [currentSky, user, isConnected]);
 
   const handleCreateStar = async (starName: string, message: string): Promise<void> => {
     if (!isConnected) {
@@ -209,7 +227,8 @@ function App() {
         y,
         size: Math.random() * 2 + 1,
         brightness: Math.random() * 0.5 + 0.5,
-        profile_id: user.id
+        profile_id: user.id,
+        sky_type: currentSky
       };
 
       const { error: insertError } = await supabase
@@ -346,6 +365,13 @@ function App() {
     <div className="relative min-h-screen bg-black">
       <StarrySky stars={stars} onStarClick={handleStarClick} />
       <MusicPlayer />
+      
+      {/* Sky Selector */}
+      <SkySelector
+        currentSky={currentSky}
+        onSkyChange={setCurrentSky}
+        isAuthenticated={!!user}
+      />
 
       {/* Error Message */}
       {error && (
@@ -485,6 +511,13 @@ function App() {
             onClose={() => setShowSearch(false)}
             onStarSelect={(star) => {
               setSelectedStar(star);
+              setShowSearch(false);
+            }}
+            onUserSelect={(userId) => {
+              // Switch to user sky when selecting a user
+              if (userId === user?.id) {
+                setCurrentSky('user');
+              }
               setShowSearch(false);
             }}
           />
