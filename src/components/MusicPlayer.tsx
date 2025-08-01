@@ -40,7 +40,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
           .from('admin_users')
           .select('id')
           .eq('email', user.email)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error checking admin status:', error);
