@@ -562,6 +562,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
