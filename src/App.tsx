@@ -40,6 +40,7 @@ function App() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+
   useEffect(() => {
     const checkConnection = async () => {
       setIsRetrying(true);

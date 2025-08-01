@@ -37,13 +37,20 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
   const searchAll = async () => {
     setLoading(true);
     setError(null);
+    
+    const trimmedSearch = searchTerm.trim();
+    if (!trimmedSearch) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       // Search users
       const { data: users, error: userError } = await supabase
         .from('profiles')
         .select('*')
-        .or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%,first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`)
+        .or(`username.ilike.%${trimmedSearch}%,display_name.ilike.%${trimmedSearch}%,first_name.ilike.%${trimmedSearch}%,last_name.ilike.%${trimmedSearch}%`)
         .limit(5);
 
       if (userError) throw userError;
@@ -59,7 +66,7 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
             hide_display_name
           )
         `)
-        .or(`star_name.ilike.%${searchTerm}%,message.ilike.%${searchTerm}%`)
+        .or(`star_name.ilike.%${trimmedSearch}%,message.ilike.%${trimmedSearch}%`)
         .limit(5);
 
       if (starError) throw starError;
