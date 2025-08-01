@@ -9,6 +9,7 @@ import { PasswordResetPage } from './components/PasswordResetPage';
 import { UnifiedSearch } from './components/UnifiedSearch';
 import { SkySelector } from './components/SkySelector';
 import { HamburgerMenu } from './components/HamburgerMenu';
+import { useLocationTime } from './hooks/useLocationTime';
 import { Star } from './types/star';
 import { Profile } from './types/profile';
 import { useAuthStore } from './store/useAuthStore';
@@ -41,6 +42,7 @@ function App() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const { isDayTime, isLoading: timeLoading, error: timeError } = useLocationTime();
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -374,7 +376,7 @@ function App() {
 
   return (
     <div className="relative min-h-screen bg-black">
-      <StarrySky stars={stars} onStarClick={handleStarClick} />
+      <StarrySky stars={stars} onStarClick={handleStarClick} isDayTime={isDayTime} />
       <MusicPlayer />
       
       {/* Sky Selector */}
@@ -382,6 +384,7 @@ function App() {
         currentSky={currentSky}
         onSkyChange={setCurrentSky}
         isAuthenticated={!!user}
+        isDayTime={isDayTime}
       />
 
       {/* Error Message */}
