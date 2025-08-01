@@ -34,8 +34,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (error) {
       console.error('Error initializing auth:', error);
       
-      // Handle invalid refresh token error
-      if (error instanceof Error && error.message.includes('Invalid Refresh Token')) {
+      // Handle session-related authentication errors
+      if (error instanceof Error && (
+        error.message.includes('Invalid Refresh Token') ||
+        error.message.includes('Session from session_id claim in JWT does not exist') ||
+        error.message.includes('session_not_found')
+      )) {
         // Clear stale session data
         set({ user: null, loading: false, error: null });
       } else {
