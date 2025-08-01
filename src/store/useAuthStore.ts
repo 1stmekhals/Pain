@@ -104,34 +104,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       
-      // Only attempt to sign out from server if we have a user session
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser) {
-        const { error } = await supabase.auth.signOut();
-        
-        // If the error indicates the session is already missing/invalid, 
-        // we still want to clear the local state
-        if (error && 
-            !error.message.includes('session_not_found') && 
-            !error.message.includes('Auth session missing')) {
-          throw error;
-        }
+      // Always attempt to sign out, but ignore session-related errors
+      const { error } = await supabase.auth.signOut();
+      
+      // Ignore errors related to missing sessions - we still want to clear local state
+      if (error && 
+          !error.message.includes('session_not_found') && 
+          !error.message.includes('Auth session missing') &&
+          error.status !== 403) {
+        console.warn('Sign out error (ignored):', error);
       }
       
       set({ user: null, loading: false });
     } catch (error: any) {
-      // Only throw errors that aren't related to missing sessions
-      if (!error.message.includes('session_not_found') && 
-          !error.message.includes('Auth session missing')) {
-        set({ 
-          error: error.message || 'Failed to sign out', 
-          loading: false 
-        });
-        throw error;
-      } else {
-        // For session-related errors, just clear the local state
-        set({ user: null, loading: false });
-      }
+      // Always clear local state regardless of server errors
+      console.warn('Sign out error (ignored):', error);
+      set({ user: null, loading: false });
     }
   },
   clearError: () => set({ error: null }),
