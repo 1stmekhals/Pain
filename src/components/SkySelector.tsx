@@ -13,12 +13,9 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
   currentSky,
   onSkyChange,
   isAuthenticated,
-  isDayTime = false, // This prop is now ignored since we only show night sky
+  isDayTime = false,
   viewingUserId,
 }) => {
-  // Force night time display
-  const forceNightTime = true;
-
   const getSkyDisplayName = () => {
     if (currentSky === 'general') return 'General Sky';
     if (viewingUserId) {
@@ -32,7 +29,11 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
       <div className="bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg p-3 border border-gray-700">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Moon className="w-4 h-4 text-blue-200" />
+            {isDayTime ? (
+              <Sun className="w-4 h-4 text-yellow-300" />
+            ) : (
+              <Moon className="w-4 h-4 text-blue-200" />
+            )}
             {currentSky === 'general' ? (
               <Globe className="w-5 h-5 text-blue-400" />
             ) : (
@@ -41,7 +42,9 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
             <span className="text-white text-sm font-medium">
               {getSkyDisplayName()}
             </span>
-            <span className="text-gray-400 text-xs">(Night)</span>
+            <span className="text-gray-400 text-xs">
+              ({isDayTime ? 'Day' : 'Night'})
+            </span>
           </div>
           
           <div className="flex gap-2">

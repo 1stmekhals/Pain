@@ -228,10 +228,12 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       />
 
       {/* Moon for night sky */}
-      <motion.div 
-        className="absolute right-10 top-10 w-24 h-24"
-        style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
-      >
+      {!isDayTime ? (
+        // Moon for night time
+        <motion.div 
+          className="absolute right-10 top-10 w-24 h-24"
+          style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
+        >
         <div className="relative w-full h-full">
           {/* Moon's atmospheric glow */}
           <div
@@ -389,7 +391,155 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             ))}
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      ) : (
+        // Sun for day time
+        <motion.div 
+          className="absolute right-10 top-10 w-24 h-24"
+          style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
+        >
+          <div className="relative w-full h-full">
+            {/* Sun's atmospheric glow */}
+            <div
+              className="absolute w-full h-full rounded-full opacity-40"
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, rgba(255, 165, 0, 0.4) 40%, rgba(255, 69, 0, 0.2) 70%, transparent 100%)',
+                transform: 'scale(2.5)',
+                filter: 'blur(15px)',
+              }}
+            />
+            
+            {/* Main sun body */}
+            <div
+              className="w-full h-full rounded-full"
+              style={{
+                background: `
+                  radial-gradient(ellipse at 30% 25%, rgba(255, 255, 255, 1) 0%, transparent 30%),
+                  radial-gradient(ellipse at 65% 40%, rgba(255, 255, 200, 0.8) 0%, transparent 25%),
+                  radial-gradient(ellipse at 45% 70%, rgba(255, 215, 0, 0.6) 0%, transparent 20%),
+                  radial-gradient(circle at 50% 50%, #FFD700 0%, #FFA500 30%, #FF8C00 60%, #FF4500 100%)
+                `,
+                boxShadow: `
+                  0 0 30px rgba(255, 215, 0, 0.8),
+                  0 0 60px rgba(255, 165, 0, 0.6),
+                  0 0 90px rgba(255, 69, 0, 0.4),
+                  inset 5px 5px 20px rgba(255, 255, 255, 0.3),
+                  inset -5px -5px 15px rgba(255, 140, 0, 0.2)
+                `,
+              }}
+            >
+              {/* Solar flares and surface features */}
+              <div className="absolute inset-0 rounded-full overflow-hidden">
+                {/* Solar prominences */}
+                <div
+                  className="absolute opacity-60"
+                  style={{
+                    width: '8px',
+                    height: '20px',
+                    left: '20%',
+                    top: '10%',
+                    background: 'radial-gradient(ellipse, rgba(255, 100, 0, 0.8) 0%, rgba(255, 200, 0, 0.4) 50%, transparent 100%)',
+                    borderRadius: '50% 50% 80% 20%',
+                    transform: 'rotate(-20deg)',
+                  }}
+                />
+                
+                <div
+                  className="absolute opacity-50"
+                  style={{
+                    width: '6px',
+                    height: '15px',
+                    left: '75%',
+                    top: '30%',
+                    background: 'radial-gradient(ellipse, rgba(255, 150, 0, 0.7) 0%, rgba(255, 220, 0, 0.3) 60%, transparent 100%)',
+                    borderRadius: '60% 40% 70% 30%',
+                    transform: 'rotate(45deg)',
+                  }}
+                />
+                
+                {/* Sunspots */}
+                <div
+                  className="absolute opacity-30"
+                  style={{
+                    width: '8px',
+                    height: '6px',
+                    left: '45%',
+                    top: '40%',
+                    background: 'radial-gradient(ellipse, rgba(139, 69, 19, 0.6) 0%, rgba(160, 82, 45, 0.3) 70%, transparent 100%)',
+                    borderRadius: '60%',
+                  }}
+                />
+                
+                <div
+                  className="absolute opacity-25"
+                  style={{
+                    width: '5px',
+                    height: '4px',
+                    left: '65%',
+                    top: '60%',
+                    background: 'radial-gradient(ellipse, rgba(139, 69, 19, 0.5) 0%, transparent 80%)',
+                    borderRadius: '50%',
+                  }}
+                />
+                
+                {/* Bright solar regions */}
+                <div
+                  className="absolute opacity-40"
+                  style={{
+                    width: '16px',
+                    height: '12px',
+                    left: '30%',
+                    top: '50%',
+                    background: 'radial-gradient(ellipse, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 200, 0.3) 60%, transparent 100%)',
+                    borderRadius: '70% 30% 60% 40%',
+                    transform: 'rotate(-30deg)',
+                  }}
+                />
+              </div>
+            </div>
+            
+            {/* Sun rays */}
+            <div className="absolute inset-0">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div
+                  key={`sun-ray-${i}`}
+                  className="absolute opacity-20"
+                  style={{
+                    width: '2px',
+                    height: '80px',
+                    background: 'linear-gradient(to bottom, rgba(255, 215, 0, 0.6) 0%, rgba(255, 165, 0, 0.4) 50%, transparent 100%)',
+                    left: '50%',
+                    top: '50%',
+                    transformOrigin: '0 0',
+                    transform: `translate(-50%, -50%) rotate(${i * 30}deg)`,
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Animated sun rays */}
+            <div className="absolute inset-0">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={`animated-ray-${i}`}
+                  className="absolute opacity-15 animate-pulse"
+                  style={{
+                    width: '1px',
+                    height: '100px',
+                    background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(255, 215, 0, 0.4) 30%, transparent 100%)',
+                    left: '50%',
+                    top: '50%',
+                    transformOrigin: '0 0',
+                    transform: `translate(-50%, -50%) rotate(${i * 45 + 22.5}deg)`,
+                    animationDuration: `${2 + i * 0.3}s`,
+                    animationDelay: `${i * 0.2}s`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Interactive user-created stars - visible in both day and night */}
       {stars.map((star) => (
