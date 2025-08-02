@@ -404,129 +404,154 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           onMouseEnter={() => setHoveredStar(star.id)}
           onMouseLeave={() => setHoveredStar(null)}
         >
-          {/* Realistic star with multiple layers */}
+          {/* Shiny star shape with multiple layers */}
           <div className="relative">
+            {/* Outer glow effect */}
+            <div
+              className="absolute transition-all duration-300"
+              style={{
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.5)' : 'scale(1)'}`,
+                filter: `blur(${Math.max(star.size * 2, 4)}px)`,
+                opacity: star.brightness * 0.8,
+              }}
+            >
+              <svg
+                width={Math.max(star.size * 12, 24)}
+                height={Math.max(star.size * 12, 24)}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z"
+                  fill={isDayTime 
+                    ? `rgba(135, 206, 250, ${star.brightness * 0.9})`
+                    : `rgba(255, 215, 0, ${star.brightness})`
+                  }
+                />
+              </svg>
+            </div>
+
             {/* Main star body */}
             <div
-              className="absolute rounded-full transition-all duration-300"
+              className="absolute transition-all duration-300"
               style={{
-                width: `${Math.max(star.size * 8, 14)}px`,
-                height: `${Math.max(star.size * 8, 14)}px`,
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.3)' : 'scale(1)'}`,
+                filter: `drop-shadow(0 0 ${Math.max(star.size * 3, 6)}px ${
+                  isDayTime 
+                    ? `rgba(135, 206, 250, ${star.brightness * 0.8})`
+                    : `rgba(255, 215, 0, ${star.brightness * 0.9})`
+                })`,
+              }}
+            >
+              <svg
+                width={Math.max(star.size * 8, 16)}
+                height={Math.max(star.size * 8, 16)}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <defs>
+                  <radialGradient id={`starGradient-${star.id}`} cx="0.3" cy="0.3" r="0.8">
+                    <stop offset="0%" stopColor={isDayTime ? "#ffffff" : "#ffffff"} />
+                    <stop offset="30%" stopColor={isDayTime ? "#87ceeb" : "#ffd700"} />
+                    <stop offset="70%" stopColor={isDayTime ? "#4682b4" : "#ffa500"} />
+                    <stop offset="100%" stopColor={isDayTime ? "#191970" : "#ff4500"} />
+                  </radialGradient>
+                </defs>
+                <path
+                  d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z"
+                  fill={`url(#starGradient-${star.id})`}
+                  stroke={isDayTime ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.9)"}
+                  strokeWidth="0.5"
+                />
+              </svg>
+            </div>
+
+            {/* Inner bright core */}
+            <div
+              className="absolute transition-all duration-300"
+              style={{
                 left: '50%',
                 top: '50%',
                 transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.4)' : 'scale(1)'}`,
-                background: isDayTime 
-                  ? `radial-gradient(circle at 35% 35%, 
-                      rgba(135, 206, 250, ${star.brightness * 0.9}) 0%, 
-                      rgba(70, 130, 180, ${star.brightness * 0.8}) 30%, 
-                      rgba(25, 25, 112, ${star.brightness * 0.6}) 70%, 
-                      rgba(0, 0, 139, ${star.brightness * 0.4}) 100%)`
-                  : `radial-gradient(circle at 35% 35%, 
-                      rgba(255, 255, 255, ${star.brightness}) 0%, 
-                      rgba(255, 248, 220, ${star.brightness * 0.9}) 25%, 
-                      rgba(255, 215, 0, ${star.brightness * 0.8}) 50%, 
-                      rgba(255, 140, 0, ${star.brightness * 0.6}) 75%, 
-                      rgba(255, 69, 0, ${star.brightness * 0.3}) 100%)`,
-                boxShadow: isDayTime 
-                  ? `
-                    0 0 ${Math.max(star.size * 4, 8)}px rgba(135, 206, 250, ${star.brightness * 0.8}),
-                    0 0 ${Math.max(star.size * 8, 16)}px rgba(70, 130, 180, ${star.brightness * 0.5}),
-                    0 0 ${Math.max(star.size * 12, 24)}px rgba(25, 25, 112, ${star.brightness * 0.3})
-                  `
-                  : `
-                    0 0 ${Math.max(star.size * 4, 8)}px rgba(255, 255, 255, ${star.brightness * 0.9}),
-                    0 0 ${Math.max(star.size * 8, 16)}px rgba(255, 215, 0, ${star.brightness * 0.7}),
-                    0 0 ${Math.max(star.size * 12, 24)}px rgba(255, 140, 0, ${star.brightness * 0.5}),
-                    0 0 ${Math.max(star.size * 16, 32)}px rgba(255, 69, 0, ${star.brightness * 0.3})
-                  `,
               }}
-            />
-            
-            {/* Star spikes/rays */}
-            {!isDayTime && (
-              <>
-                {/* Vertical ray */}
-                <div
-                  className="absolute bg-white opacity-60 transition-all duration-300"
-                  style={{
-                    width: '1px',
-                    height: `${Math.max(star.size * 16, 32)}px`,
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
-                    boxShadow: `0 0 ${Math.max(star.size * 2, 4)}px rgba(255, 255, 255, ${star.brightness * 0.8})`,
-                  }}
+            >
+              <svg
+                width={Math.max(star.size * 4, 8)}
+                height={Math.max(star.size * 4, 8)}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z"
+                  fill="rgba(255, 255, 255, 0.95)"
                 />
-                {/* Horizontal ray */}
-                <div
-                  className="absolute bg-white opacity-60 transition-all duration-300"
-                  style={{
-                    width: `${Math.max(star.size * 16, 32)}px`,
-                    height: '1px',
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(-50%, -50%) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
-                    boxShadow: `0 0 ${Math.max(star.size * 2, 4)}px rgba(255, 255, 255, ${star.brightness * 0.8})`,
-                  }}
-                />
-                {/* Diagonal rays */}
-                <div
-                  className="absolute bg-white opacity-40 transition-all duration-300"
-                  style={{
-                    width: '1px',
-                    height: `${Math.max(star.size * 12, 24)}px`,
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(-50%, -50%) rotate(45deg) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
-                    boxShadow: `0 0 ${Math.max(star.size * 1.5, 3)}px rgba(255, 255, 255, ${star.brightness * 0.6})`,
-                  }}
-                />
-                <div
-                  className="absolute bg-white opacity-40 transition-all duration-300"
-                  style={{
-                    width: '1px',
-                    height: `${Math.max(star.size * 12, 24)}px`,
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(-50%, -50%) rotate(-45deg) ${hoveredStar === star.id ? 'scale(1.2)' : 'scale(1)'}`,
-                    boxShadow: `0 0 ${Math.max(star.size * 1.5, 3)}px rgba(255, 255, 255, ${star.brightness * 0.6})`,
-                  }}
-                />
-              </>
-            )}
-            
-            {/* Core highlight */}
+              </svg>
+            {/* Sparkle effects around the star */}
+            <div className="absolute inset-0">
+              {Array.from({ length: 4 }).map((_, i) => {
+                const angle = (i * 90) + (hoveredStar === star.id ? 45 : 0);
+                const distance = Math.max(star.size * 6, 12);
+                const sparkleSize = Math.max(star.size * 1.5, 3);
+                return (
+                  <div
+                    key={`sparkle-${i}`}
+                    className="absolute transition-all duration-300"
+                    style={{
+                      left: '50%',
+                      top: '50%',
+                      transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${distance}px)`,
+                      opacity: star.brightness * 0.7,
+                    }}
+                  >
+                    <div
+                      className="animate-pulse"
+                      style={{
+                        width: `${sparkleSize}px`,
+                        height: `${sparkleSize}px`,
+                        background: isDayTime 
+                          ? 'radial-gradient(circle, rgba(135, 206, 250, 0.9) 0%, transparent 70%)'
+                          : 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        animationDuration: `${1.5 + Math.random() * 2}s`,
+                        animationDelay: `${i * 0.3}s`,
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            </div>
+            {/* Twinkling animation overlay */}
             <div
-              className="absolute rounded-full transition-all duration-300"
+              className="absolute animate-pulse"
               style={{
-                width: `${Math.max(star.size * 3, 6)}px`,
-                height: `${Math.max(star.size * 3, 6)}px`,
-                left: '50%',
-                top: '50%',
-                transform: `translate(-50%, -50%) translate(-20%, -20%) ${hoveredStar === star.id ? 'scale(1.5)' : 'scale(1)'}`,
-                background: isDayTime 
-                  ? 'rgba(255, 255, 255, 0.9)'
-                  : 'rgba(255, 255, 255, 0.95)',
-                boxShadow: `0 0 ${Math.max(star.size * 2, 4)}px rgba(255, 255, 255, 0.8)`,
-              }}
-            />
-            
-            {/* Subtle twinkle animation */}
-            <div
-              className="absolute rounded-full animate-pulse"
-              style={{
-                width: `${Math.max(star.size * 6, 12)}px`,
-                height: `${Math.max(star.size * 6, 12)}px`,
                 left: '50%',
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
-                background: isDayTime 
-                  ? 'rgba(135, 206, 250, 0.3)'
-                  : 'rgba(255, 255, 255, 0.2)',
+                opacity: star.brightness * 0.6,
                 animationDuration: `${2 + Math.random() * 3}s`,
                 animationDelay: `${Math.random() * 2}s`,
               }}
-            />
+            >
+              <svg
+                width={Math.max(star.size * 10, 20)}
+                height={Math.max(star.size * 10, 20)}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z"
+                  fill={isDayTime 
+                    ? 'rgba(135, 206, 250, 0.3)'
+                    : 'rgba(255, 255, 255, 0.4)'
+                  }
+                />
+              </svg>
+            </div>
           </div>
         </div>
       ))}
