@@ -1,38 +1,49 @@
+// Supabase client configuration and connection utilities
+// Handles database connection, error handling, and connection testing
 import { createClient } from '@supabase/supabase-js';
+// Import the Supabase client creation function
 
+// Get Supabase URL from environment variables and trim whitespace
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+// Get Supabase anonymous key from environment variables and trim whitespace
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
+// Check if required environment variables are present
 if (!supabaseUrl || !supabaseAnonKey) {
+  // Throw error with helpful message if credentials are missing
   throw new Error(
     'Missing Supabase credentials. Please click the "Connect to Supabase" button in the top right corner to set up your database connection.'
   );
 }
 
-// Ensure URL doesn't end with a trailing slash
+// Ensure URL doesn't end with a trailing slash for consistency
 const normalizedUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
 
+// Create and export the Supabase client with configuration
 export const supabase = createClient(normalizedUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
+    persistSession: true, // Keep user session across browser refreshes
+    autoRefreshToken: true, // Automatically refresh expired tokens
+    detectSessionInUrl: true // Detect auth tokens in URL (for email confirmations)
   },
   global: {
     headers: {
-      'x-application-name': 'star-letter'
+      'x-application-name': 'star-letter' // Custom header to identify our app
     }
   },
   db: {
-    schema: 'public'
+    schema: 'public' // Use the public schema
   }
 });
 
 // Helper function to determine if error is CORS-related
 const isCorsError = (error: any): boolean => {
+  // Get error message in lowercase for case-insensitive checking
   const errorMessage = error?.message?.toLowerCase() || '';
+  // Get error string representation in lowercase
   const errorString = error?.toString?.()?.toLowerCase() || '';
   
+  // Check for common CORS-related error indicators
   return (
     errorMessage.includes('cors') ||
     errorMessage.includes('cross-origin') ||
@@ -40,13 +51,16 @@ const isCorsError = (error: any): boolean => {
     errorString.includes('cors') ||
     errorString.includes('cross-origin') ||
     errorString.includes('failed to fetch') ||
+    // Check for TypeError with fetch-related message (common CORS symptom)
     error?.name === 'TypeError' && errorMessage.includes('fetch')
   );
 };
 
 // Helper function to get user-friendly error message
 const getConnectionErrorMessage = (error: any): string => {
+  // Check if error is CORS-related
   if (isCorsError(error)) {
+    // Return detailed CORS setup instructions
     return `CORS Configuration Required
 
 Your Supabase project needs to allow requests from this local development server.
@@ -62,7 +76,9 @@ To fix this:
 This is a one-time setup required for local development.`;
   }
 
+  // Check if error is timeout-related
   if (error?.message?.includes('timeout') || error?.name === 'AbortError') {
+    // Return timeout-specific error message
     return `Connection Timeout
 
 Unable to reach your Supabase project. This could be due to:
@@ -73,6 +89,7 @@ Unable to reach your Supabase project. This could be due to:
 Please check your internet connection and Supabase project status.`;
   }
 
+  // Return generic error message for other types of errors
   return `Database Connection Error
 
 Unable to connect to your Supabase project. Please check:
@@ -87,16 +104,18 @@ Error details: ${error?.message || 'Unknown error'}`;
 export const checkSupabaseConnection = async (): Promise<{ success: boolean; error?: string }> => {
   try {
     // First, try a simple health check with a timeout
-    const controller = new AbortController();
+    const controller = new AbortController(); // Create abort controller for timeout
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
     // Try to check if we can connect to Supabase at all
     const { data, error } = await supabase.auth.getSession();
 
-    clearTimeout(timeoutId);
+    clearTimeout(timeoutId); // Clear the timeout since request completed
 
     if (error) {
+      // Log error for debugging
       console.error('Supabase connection error:', error);
+      // Return failure with user-friendly error message
       return {
         success: false,
         error: getConnectionErrorMessage(error)
@@ -106,7 +125,9 @@ export const checkSupabaseConnection = async (): Promise<{ success: boolean; err
     // If we can get session info, connection is working
     return { success: true };
   } catch (err: any) {
+    // Log error for debugging
     console.error('Supabase connection error:', err);
+    // Return failure with user-friendly error message
     return {
       success: false,
       error: getConnectionErrorMessage(err)
@@ -117,30 +138,37 @@ export const checkSupabaseConnection = async (): Promise<{ success: boolean; err
 // Additional helper to test basic network connectivity
 export const testNetworkConnectivity = async (): Promise<{ success: boolean; error?: string }> => {
   try {
+    // Create abort controller for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
+    // Try to make a HEAD request to Supabase REST API endpoint
     const response = await fetch(`${normalizedUrl}/rest/v1/`, {
-      method: 'HEAD',
+      method: 'HEAD', // HEAD request to minimize data transfer
       headers: {
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${supabaseAnonKey}`
+        'apikey': supabaseAnonKey, // Include API key in headers
+        'Authorization': `Bearer ${supabaseAnonKey}` // Include authorization header
       },
-      signal: controller.signal
+      signal: controller.signal // Include abort signal for timeout
     });
 
-    clearTimeout(timeoutId);
+    clearTimeout(timeoutId); // Clear timeout since request completed
     
+    // Check if response is not OK
     if (!response.ok) {
+      // Return failure with status code information
       return {
         success: false,
         error: `Server responded with status ${response.status}. Please check your Supabase project status.`
       };
     }
     
+    // Return success if everything is OK
     return { success: true };
   } catch (err: any) {
+    // Log error for debugging
     console.error('Network connectivity test failed:', err);
+    // Return failure with user-friendly error message
     return {
       success: false,
       error: getConnectionErrorMessage(err)
