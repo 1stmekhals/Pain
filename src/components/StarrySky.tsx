@@ -10,21 +10,126 @@ interface StarrySkyProps {
 
 export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayTime = false }) => {
   const [hoveredStar, setHoveredStar] = useState<string | null>(null);
+  const [skyOffset, setSkyOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, offset: 0 });
+
+  // Handle mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX,
+      offset: skyOffset
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - dragStart.x;
+    const newOffset = dragStart.offset + deltaX;
+    
+    // Limit the offset to prevent going too far
+    const maxOffset = window.innerWidth * 0.5;
+    const minOffset = -window.innerWidth * 0.5;
+    
+    setSkyOffset(Math.max(minOffset, Math.min(maxOffset, newOffset)));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Handle touch events for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.touches[0].clientX,
+      offset: skyOffset
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.touches[0].clientX - dragStart.x;
+    const newOffset = dragStart.offset + deltaX;
+    
+    // Limit the offset to prevent going too far
+    const maxOffset = window.innerWidth * 0.5;
+    const minOffset = -window.innerWidth * 0.5;
+    
+    setSkyOffset(Math.max(minOffset, Math.min(maxOffset, newOffset)));
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse event listeners
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const deltaX = e.clientX - dragStart.x;
+      const newOffset = dragStart.offset + deltaX;
+      
+      const maxOffset = window.innerWidth * 0.5;
+      const minOffset = -window.innerWidth * 0.5;
+      
+      setSkyOffset(Math.max(minOffset, Math.min(maxOffset, newOffset)));
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart]);
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div 
+      className="absolute inset-0 overflow-hidden select-none"
+      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Dynamic sky background based on time */}
-      <div className={`absolute inset-0 transition-all duration-1000 ${
+      <motion.div 
+        className={`absolute inset-0 transition-all duration-1000 ${
         isDayTime 
           ? 'bg-gradient-to-b from-blue-400 via-blue-300 to-blue-200' 
           : 'bg-gradient-to-b from-indigo-950 via-slate-900 to-black'
-      }`} />
+        }`}
+        style={{
+          transform: `translateX(${skyOffset}px)`,
+          width: '200%',
+          left: '-50%'
+        }}
+        animate={{ x: skyOffset }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      />
       
       {isDayTime ? (
         <>
           {/* Day sky elements */}
           {/* Sun */}
-          <div className="absolute right-20 top-20 w-32 h-32">
+          <motion.div 
+            className="absolute right-20 top-20 w-32 h-32"
+            style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
+          >
             <div
               className="w-full h-full rounded-full"
               style={{
@@ -32,10 +137,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 boxShadow: '0 0 50px rgba(255, 235, 59, 0.6), 0 0 100px rgba(255, 235, 59, 0.4)',
               }}
             />
-          </div>
+          </motion.div>
 
           {/* Clouds */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.5}px)` }}
+          >
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={`cloud-${i}`}
@@ -51,10 +159,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 }}
               />
             ))}
-          </div>
+          </motion.div>
 
           {/* Birds */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.7}px)` }}
+          >
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={`bird-${i}`}
@@ -69,9 +180,12 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 ᵛ
               </div>
             ))}
-          </div>
+          </motion.div>
           {/* Sun */}
-          <div className="absolute right-20 top-20 w-32 h-32">
+          <motion.div 
+            className="absolute right-20 top-20 w-32 h-32"
+            style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
+          >
             <div
               className="w-full h-full rounded-full"
               style={{
@@ -79,10 +193,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 boxShadow: '0 0 50px rgba(255, 235, 59, 0.6), 0 0 100px rgba(255, 235, 59, 0.4)',
               }}
             />
-          </div>
+          </motion.div>
 
           {/* Clouds */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.5}px)` }}
+          >
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={`cloud-${i}`}
@@ -98,10 +215,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 }}
               />
             ))}
-          </div>
+          </motion.div>
 
           {/* Birds */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.7}px)` }}
+          >
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={`bird-${i}`}
@@ -116,13 +236,16 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 ᵛ
               </div>
             ))}
-          </div>
+          </motion.div>
         </>
       ) : (
         <>
           {/* Night sky elements */}
           {/* Static background stars */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.2}px)` }}
+          >
             {Array.from({ length: 300 }).map((_, i) => {
               const size = Math.random() * 2 + 0.5;
               const opacity = Math.random() * 0.8 + 0.2;
@@ -141,10 +264,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 />
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Larger background stars */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
+          >
             {Array.from({ length: 50 }).map((_, i) => {
               const size = Math.random() * 3 + 2;
               const opacity = Math.random() * 0.6 + 0.4;
@@ -163,10 +289,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 />
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Constellation-like star clusters */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.4}px)` }}
+          >
             {Array.from({ length: 20 }).map((_, i) => {
               const clusterX = Math.random() * 80 + 10;
               const clusterY = Math.random() * 80 + 10;
@@ -194,10 +323,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 </div>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Nebula-like clouds */}
-          <div className="absolute inset-0">
+          <motion.div 
+            className="absolute inset-0"
+            style={{ transform: `translateX(${skyOffset * 0.6}px)` }}
+          >
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`nebula-${i}`}
@@ -212,19 +344,23 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 }}
               />
             ))}
-          </div>
+          </motion.div>
 
           {/* Milky Way band */}
-          <div
+          <motion.div
             className="absolute inset-0 opacity-15"
             style={{
+              transform: `translateX(${skyOffset * 0.1}px)`,
               background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 55%, transparent 70%)',
-              transform: 'rotate(-15deg)',
+              rotate: '-15deg',
             }}
           />
 
           {/* Moon for night sky */}
-          <div className="absolute right-10 top-10 w-24 h-24">
+          <motion.div 
+            className="absolute right-10 top-10 w-24 h-24"
+            style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
+          >
             <div className="relative w-full h-full">
               {/* Moon's atmospheric glow */}
               <div
@@ -382,17 +518,17 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         </>
       )}
 
       {/* Interactive user-created stars - visible in both day and night */}
       {stars.map((star) => (
-        <div
+        <motion.div
           key={star.id}
           className="absolute cursor-pointer interactive-star"
           style={{
-            left: `${star.x}%`,
+            left: `${star.x + (skyOffset * 0.05)}%`,
             top: `${star.y}%`,
             zIndex: hoveredStar === star.id ? 10 : 1,
             transform: 'translate(-50%, -50%)', // Center the star on its coordinates
@@ -553,7 +689,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               </svg>
             </div>
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
