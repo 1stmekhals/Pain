@@ -230,15 +230,38 @@ function App() {
     }
 
     try {
-      let x, y;
+      let x, y, attempts = 0;
+      const maxAttempts = 100;
+      const minDistance = 5; // Minimum distance between stars (in percentage)
+      
       do {
         x = Math.random() * 80 + 10; // 10% to 90% from left
         y = Math.random() * 60 + 20; // 20% to 80% from top
-      } while (
-        (x > 75 && y < 35) || // Avoid moon area (top-right)
-        (x < 25 && y < 25) || // Avoid sky selector area (top-left)
-        (x > 75 && y > 75)    // Avoid bottom-right corner
-      );
+        attempts++;
+        
+        // Check if position conflicts with UI elements
+        const conflictsWithUI = (
+          (x > 75 && y < 35) || // Avoid moon area (top-right)
+          (x < 25 && y < 25) || // Avoid sky selector area (top-left)
+          (x > 75 && y > 75)    // Avoid bottom-right corner
+        );
+        
+        // Check if position is too close to existing stars
+        const tooCloseToExistingStar = stars.some(existingStar => {
+          const distance = Math.sqrt(
+            Math.pow(existingStar.x - x, 2) + Math.pow(existingStar.y - y, 2)
+          );
+          return distance < minDistance;
+        });
+        
+        if (!conflictsWithUI && !tooCloseToExistingStar) {
+          break;
+        }
+        
+        if (attempts >= maxAttempts) {
+          throw new Error('Unable to find a suitable location for the star. The sky might be too crowded.');
+        }
+      } while (true);
 
       const newStar = {
         star_name: starName,
