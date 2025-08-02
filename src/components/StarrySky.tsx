@@ -141,7 +141,6 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   }, [isDragging, dragStart]);
 
   return (
-    {/* Main sky container with drag controls and touch handling */}
     <div 
       className="absolute inset-0 overflow-hidden select-none touch-none"
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
@@ -150,11 +149,14 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Dynamic sky background gradient */}
-      {/* Dynamic sky background based on time */}
+      {/* Main sky container with drag controls and touch handling */}
+      
       <motion.div 
         className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-slate-900 to-black"
-      />
+      >
+        {/* Dynamic sky background gradient */}
+        {/* Dynamic sky background based on time */}
+      </motion.div>
       
       {/* Static background stars - small twinkling stars */}
       {/* Night sky elements */}
@@ -337,8 +339,6 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       {/* Conditional rendering of Moon (night) or Sun (day) */}
       {/* Moon for night sky */}
       {!isDayTime ? (
-        // Moon segments for night time
-        // Moon for night time
         Array.from({ length: 3 }).map((segment) => (
           <motion.div 
             key={`moon-${segment}`}
@@ -351,9 +351,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               left: `${segment * 100 + 80}%`,
             }}
           >
+            {/* Moon segments for night time */}
+            {/* Moon for night time */}
         <div className="relative w-full h-full">
-          {/* Moon's atmospheric glow effect */}
-          {/* Moon's atmospheric glow */}
           <div
             className="absolute w-full h-full rounded-full opacity-30"
             style={{
@@ -363,10 +363,11 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               transform: 'scale(1.8)',
               filter: 'blur(8px)',
             }}
-          />
+          >
+            {/* Moon's atmospheric glow effect */}
+            {/* Moon's atmospheric glow */}
+          </div>
           
-          {/* Main moon body with realistic surface features */}
-          {/* Main moon body */}
           <div
             className="w-full h-full rounded-full"
             style={{
@@ -388,9 +389,11 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               `,
             }}
           >
-            {/* Lunar surface features container */}
-            {/* Lunar craters and surface features */}
             <div className="absolute inset-0 rounded-full overflow-hidden">
+              {/* Main moon body with realistic surface features */}
+              {/* Main moon body */}
+              {/* Lunar surface features container */}
+              {/* Lunar craters and surface features */}
               {/* Large crater */}
               {/* Large crater */}
               <div
@@ -506,9 +509,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             </div>
           </div>
           
-          {/* Subtle light rays emanating from moon */}
-          {/* Subtle light rays from moon */}
           <div className="absolute inset-0">
+            {/* Subtle light rays emanating from moon */}
+            {/* Subtle light rays from moon */}
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={`moon-ray-${i}`}
@@ -531,8 +534,6 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           </motion.div>
         ))
       ) : (
-        // Sun segments for day time
-        // Sun for day time
         Array.from({ length: 3 }).map((segment) => (
           <motion.div 
             key={`sun-${segment}`}
@@ -545,9 +546,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               left: `${segment * 100 + 80}%`,
             }}
           >
+          {/* Sun segments for day time */}
+          {/* Sun for day time */}
           <div className="relative w-full h-full">
-            {/* Sun's atmospheric glow */}
-            {/* Sun's atmospheric glow */}
             <div
               className="absolute w-full h-full rounded-full opacity-40"
               style={{
@@ -557,10 +558,11 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 transform: 'scale(2.5)',
                 filter: 'blur(15px)',
               }}
-            />
+            >
+              {/* Sun's atmospheric glow */}
+              {/* Sun's atmospheric glow */}
+            </div>
             
-            {/* Main sun body with realistic solar features */}
-            {/* Main sun body */}
             <div
               className="w-full h-full rounded-full"
               style={{
@@ -581,9 +583,11 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 `,
               }}
             >
-              {/* Solar surface features container */}
-              {/* Solar flares and surface features */}
               <div className="absolute inset-0 rounded-full overflow-hidden">
+                {/* Main sun body with realistic solar features */}
+                {/* Main sun body */}
+                {/* Solar surface features container */}
+                {/* Solar flares and surface features */}
                 {/* Solar prominences (flame-like projections) */}
                 {/* Solar prominences */}
                 <div
@@ -659,9 +663,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               </div>
             </div>
             
-            {/* Static sun rays */}
-            {/* Sun rays */}
             <div className="absolute inset-0">
+              {/* Static sun rays */}
+              {/* Sun rays */}
               {Array.from({ length: 12 }).map((_, i) => (
                 <div
                   key={`sun-ray-${i}`}
@@ -681,9 +685,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
               ))}
             </div>
             
-            {/* Animated sun rays with pulsing effect */}
-            {/* Animated sun rays */}
             <div className="absolute inset-0">
+              {/* Animated sun rays with pulsing effect */}
+              {/* Animated sun rays */}
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={`animated-ray-${i}`}
@@ -740,9 +744,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
         >
-          {/* Multi-layered star rendering for realistic appearance */}
-          {/* Shiny star shape with multiple layers */}
           <div className="relative">
+            {/* Multi-layered star rendering for realistic appearance */}
+            {/* Shiny star shape with multiple layers */}
             {/* Outer glow effect layer */}
             {/* Outer glow effect */}
             <div
@@ -832,9 +836,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                   fill="rgba(255, 255, 255, 0.95)"
                 />
               </svg>
-            {/* Sparkle effects around the star */}
-            {/* Sparkle effects around the star */}
             <div className="absolute inset-0">
+              {/* Sparkle effects around the star */}
+              {/* Sparkle effects around the star */}
               {Array.from({ length: 4 }).map((_, i) => {
                 // Calculate sparkle position (rotates when hovered)
                 const angle = (i * 90) + (hoveredStar === star.id ? 45 : 0);
@@ -852,7 +856,6 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                       opacity: star.brightness * 0.7,
                     }}
                   >
-                    {/* Individual sparkle with pulsing animation */}
                     <div
                       className="animate-pulse"
                       style={{
@@ -863,13 +866,14 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                         animationDuration: `${1.5 + Math.random() * 2}s`,
                         animationDelay: `${i * 0.3}s`,
                       }}
-                    />
+                    >
+                      {/* Individual sparkle with pulsing animation */}
+                    </div>
                   </div>
                 );
               })}
             </div>
             </div>
-            {/* Twinkling animation overlay */}
             <div
               className="absolute animate-pulse"
               style={{
@@ -881,6 +885,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
                 animationDelay: `${Math.random() * 2}s`,
               }}
             >
+              {/* Twinkling animation overlay */}
               <svg
                 width={Math.max(star.size * 10, 20)}
                 height={Math.max(star.size * 10, 20)}
