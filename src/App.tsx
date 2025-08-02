@@ -327,15 +327,16 @@ function App() {
       // Loop to find a position that doesn't conflict with existing stars or UI
       do {
         // Generate random position within safe bounds
-        x = Math.random() * 80 + 10; // 10% to 90% from left
+        x = Math.random() * 100; // 0% to 100% across the full 360-degree sky
         y = Math.random() * 60 + 20; // 20% to 80% from top
         attempts++; // Increment attempt counter
         
-        // Check if position conflicts with UI elements
+        // Check if position conflicts with UI elements (convert to screen position)
+        const screenX = (x * window.innerWidth / 100) % window.innerWidth;
         const conflictsWithUI = (
-          (x > 75 && y < 35) || // Avoid moon area (top-right)
-          (x < 25 && y < 25) || // Avoid sky selector area (top-left)
-          (x > 75 && y > 75)    // Avoid bottom-right corner
+          (screenX > window.innerWidth * 0.75 && y < 35) || // Avoid moon area (top-right)
+          (screenX < window.innerWidth * 0.25 && y < 25) || // Avoid sky selector area (top-left)
+          (screenX > window.innerWidth * 0.75 && y > 75)    // Avoid bottom-right corner
         );
         
         // Check if position is too close to existing stars
