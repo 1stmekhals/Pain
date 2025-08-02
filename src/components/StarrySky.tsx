@@ -19,6 +19,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
   // Handle mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     setIsDragging(true);
     setDragStart({
       x: e.clientX,
@@ -27,13 +28,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - dragStart.x;
-    const newOffset = dragStart.offset + deltaX;
-    
-    // Unlimited scrolling - no boundaries
-    setSkyOffset(newOffset);
+    // Only handle mouse move if we're dragging
+    if (isDragging) {
+      e.preventDefault();
+      const deltaX = e.clientX - dragStart.x;
+      const newOffset = dragStart.offset + deltaX;
+      setSkyOffset(newOffset);
+    }
   };
 
   const handleMouseUp = () => {
@@ -42,6 +43,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
   // Handle touch events for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
     setIsDragging(true);
     setDragStart({
       x: e.touches[0].clientX,
@@ -50,13 +52,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.touches[0].clientX - dragStart.x;
-    const newOffset = dragStart.offset + deltaX;
-    
-    // Unlimited scrolling - no boundaries
-    setSkyOffset(newOffset);
+    // Only handle touch move if we're dragging
+    if (isDragging) {
+      e.preventDefault();
+      const deltaX = e.touches[0].clientX - dragStart.x;
+      const newOffset = dragStart.offset + deltaX;
+      setSkyOffset(newOffset);
+    }
   };
 
   const handleTouchEnd = () => {
@@ -66,13 +68,12 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   // Add global mouse event listeners
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      
-      const deltaX = e.clientX - dragStart.x;
-      const newOffset = dragStart.offset + deltaX;
-      
-      // Unlimited scrolling - no boundaries
-      setSkyOffset(newOffset);
+      if (isDragging) {
+        e.preventDefault();
+        const deltaX = e.clientX - dragStart.x;
+        const newOffset = dragStart.offset + deltaX;
+        setSkyOffset(newOffset);
+      }
     };
 
     const handleGlobalMouseUp = () => {
@@ -92,13 +93,11 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
   return (
     <div 
-      className="absolute inset-0 overflow-hidden select-none"
+      className="absolute inset-0 overflow-hidden select-none touch-none"
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Dynamic sky background based on time */}
@@ -547,17 +546,21 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           key={star.id}
           className="absolute cursor-pointer interactive-star"
           style={{
-            left: `${star.x + (skyOffset * 0.05)}%`,
+            left: `${star.x + (skyOffset * 0.8)}%`,
             top: `${star.y}%`,
             zIndex: hoveredStar === star.id ? 10 : 1,
             transform: 'translate(-50%, -50%)', // Center the star on its coordinates
           }}
           onClick={(e) => {
             e.stopPropagation();
-            onStarClick(star);
+            if (!isDragging) {
+              onStarClick(star);
+            }
           }}
           onMouseEnter={() => setHoveredStar(star.id)}
           onMouseLeave={() => setHoveredStar(null)}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           {/* Shiny star shape with multiple layers */}
           <div className="relative">
