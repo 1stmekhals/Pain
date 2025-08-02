@@ -29,11 +29,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
     const deltaX = e.clientX - dragStart.x;
     const newOffset = dragStart.offset + deltaX;
     
-    // Limit the offset to prevent going too far
-    const maxOffset = window.innerWidth * 0.5;
-    const minOffset = -window.innerWidth * 0.5;
-    
-    setSkyOffset(Math.max(minOffset, Math.min(maxOffset, newOffset)));
+    // Unlimited scrolling - no boundaries
+    setSkyOffset(newOffset);
   };
 
   const handleMouseUp = () => {
@@ -55,11 +52,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
     const deltaX = e.touches[0].clientX - dragStart.x;
     const newOffset = dragStart.offset + deltaX;
     
-    // Limit the offset to prevent going too far
-    const maxOffset = window.innerWidth * 0.5;
-    const minOffset = -window.innerWidth * 0.5;
-    
-    setSkyOffset(Math.max(minOffset, Math.min(maxOffset, newOffset)));
+    // Unlimited scrolling - no boundaries
+    setSkyOffset(newOffset);
   };
 
   const handleTouchEnd = () => {
@@ -74,10 +68,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       const deltaX = e.clientX - dragStart.x;
       const newOffset = dragStart.offset + deltaX;
       
-      const maxOffset = window.innerWidth * 0.5;
-      const minOffset = -window.innerWidth * 0.5;
-      
-      setSkyOffset(Math.max(minOffset, Math.min(maxOffset, newOffset)));
+      // Unlimited scrolling - no boundaries
+      setSkyOffset(newOffset);
     };
 
     const handleGlobalMouseUp = () => {
@@ -115,11 +107,9 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
         }`}
         style={{
           transform: `translateX(${skyOffset}px)`,
-          width: '200%',
-          left: '-50%'
+          width: '400%',
+          left: '-150%'
         }}
-        animate={{ x: skyOffset }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       />
       
       {isDayTime ? (
@@ -144,7 +134,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             className="absolute inset-0"
             style={{ transform: `translateX(${skyOffset * 0.5}px)` }}
           >
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 20 }).map((_, i) => (
               <div
                 key={`cloud-${i}`}
                 className="absolute opacity-80"
@@ -166,7 +156,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             className="absolute inset-0"
             style={{ transform: `translateX(${skyOffset * 0.7}px)` }}
           >
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: 15 }).map((_, i) => (
               <div
                 key={`bird-${i}`}
                 className="absolute text-gray-700 opacity-60"
@@ -246,7 +236,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             className="absolute inset-0"
             style={{ transform: `translateX(${skyOffset * 0.2}px)` }}
           >
-            {Array.from({ length: 300 }).map((_, i) => {
+            {Array.from({ length: 800 }).map((_, i) => {
               const size = Math.random() * 2 + 0.5;
               const opacity = Math.random() * 0.8 + 0.2;
               return (
@@ -271,7 +261,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             className="absolute inset-0"
             style={{ transform: `translateX(${skyOffset * 0.3}px)` }}
           >
-            {Array.from({ length: 50 }).map((_, i) => {
+            {Array.from({ length: 120 }).map((_, i) => {
               const size = Math.random() * 3 + 2;
               const opacity = Math.random() * 0.6 + 0.4;
               return (
@@ -296,7 +286,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             className="absolute inset-0"
             style={{ transform: `translateX(${skyOffset * 0.4}px)` }}
           >
-            {Array.from({ length: 20 }).map((_, i) => {
+            {Array.from({ length: 40 }).map((_, i) => {
               const clusterX = Math.random() * 80 + 10;
               const clusterY = Math.random() * 80 + 10;
               return (
@@ -330,7 +320,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             className="absolute inset-0"
             style={{ transform: `translateX(${skyOffset * 0.6}px)` }}
           >
-            {Array.from({ length: 3 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={`nebula-${i}`}
                 className="absolute rounded-full opacity-10"
