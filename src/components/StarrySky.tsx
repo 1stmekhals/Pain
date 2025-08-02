@@ -263,7 +263,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       {/* Moon for night sky */}
       {!isDayTime ? (
         // Moon for night time
-        {Array.from({ length: 3 }).map((segment) => (
+        Array.from({ length: 3 }).map((segment) => (
           <motion.div 
             key={`moon-${segment}`}
             className="absolute w-24 h-24"
@@ -432,10 +432,10 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           </div>
         </div>
           </motion.div>
-        ))}
+        ))
       ) : (
         // Sun for day time
-        {Array.from({ length: 3 }).map((segment) => (
+        Array.from({ length: 3 }).map((segment) => (
           <motion.div 
             key={`sun-${segment}`}
             className="absolute w-24 h-24"
@@ -587,7 +587,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             </div>
           </div>
           </motion.div>
-        ))}
+        ))
       )}
 
       {/* Interactive user-created stars - visible in both day and night */}
