@@ -757,23 +757,6 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-                  {selectedStar.message}
-                </p>
-                {/* Author information if not hidden */}
-                <div className="mt-2 text-gray-400 text-sm">
-                  {selectedStar.profiles?.display_name && !selectedStar.profiles?.hide_display_name && (
-                    <p>By: {selectedStar.profiles.display_name}</p>
-                  )}
-                </div>
-                {/* Instructions for closing */}
-                <div className="mt-3 text-gray-400 text-xs">
-                  Click anywhere to close
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Create star modal */}
       <CreateStarModal
