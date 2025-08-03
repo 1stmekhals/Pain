@@ -542,11 +542,11 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           key={star.id}
           className="absolute cursor-pointer interactive-star"
           style={{
-            // Position star at its fixed coordinates
+            // Position star and make it move with sky offset
             left: `${star.x}%`,
             top: `${star.y}%`,
-            // Center the star and apply minimal movement (5% of sky offset)
-            transform: `translate(-50%, -50%) translateX(${normalizedOffset * 0.05}px)`,
+            // Center the star and move it with the sky at 80% speed for realistic parallax
+            transform: `translate(-50%, -50%) translateX(${normalizedOffset * 0.8}px)`,
             // Higher z-index when hovered
             zIndex: hoveredStar === star.id ? 10 : 1,
           }}
