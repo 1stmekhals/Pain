@@ -90,7 +90,6 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   // Handle touch move event for mobile devices
   const handleTouchMove = (e: React.TouchEvent) => {
     // Only process if currently dragging
-    // Only handle touch move if we're dragging
     if (isDragging) {
       // Prevent default touch behavior
       e.preventDefault();
@@ -108,8 +107,24 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   };
 
   // Effect to add global mouse event listeners for smooth dragging
-  // Add global mouse event listeners
   useEffect(() => {
+    // Global touch move handler for dragging outside component
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (isDragging) {
+        // Prevent default behavior
+        e.preventDefault();
+        // Calculate movement and update offset
+        const deltaX = e.touches[0].clientX - dragStart.x;
+        const newOffset = dragStart.offset + deltaX;
+        setSkyOffset(newOffset);
+      }
+    };
+
+    // Global touch end handler
+    const handleGlobalTouchEnd = () => {
+      setIsDragging(false);
+    };
+
     // Global mouse move handler for dragging outside component
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (isDragging) {
@@ -131,12 +146,16 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
     if (isDragging) {
       document.addEventListener('mousemove', handleGlobalMouseMove);
       document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+      document.addEventListener('touchend', handleGlobalTouchEnd);
     }
 
     // Cleanup listeners on unmount or when dragging stops
     return () => {
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
     };
   }, [isDragging, dragStart]);
 
@@ -145,8 +164,10 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       className="absolute inset-0 overflow-hidden select-none touch-none"
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Main sky container with drag controls and touch handling */}
