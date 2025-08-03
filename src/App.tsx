@@ -665,24 +665,98 @@ function App() {
       <AnimatePresence>
         {selectedStar && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }} // Start invisible and below
-            animate={{ opacity: 1, y: 0 }} // Animate to visible and in position
-            exit={{ opacity: 0, y: 20 }} // Exit invisible and below
+            initial={{ opacity: 0, scale: 0.8, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 30 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed bottom-20 sm:bottom-8 left-4 right-4 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 z-50 star-message"
           >
-            <div className="bg-gray-900 bg-opacity-90 p-6 rounded-xl sm:max-w-md backdrop-blur-md border border-gray-700 shadow-2xl">
+            <div className="relative bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 p-6 rounded-2xl sm:max-w-lg backdrop-blur-xl border border-gray-600/50 shadow-2xl overflow-hidden">
+              {/* Animated background stars */}
+              <div className="absolute inset-0 overflow-hidden">
+                {Array.from({ length: 15 }).map((_, i) => (
+                  <div
+                    key={`msg-star-${i}`}
+                    className="absolute bg-white rounded-full animate-pulse opacity-20"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      width: `${Math.random() * 2 + 1}px`,
+                      height: `${Math.random() * 2 + 1}px`,
+                      animationDelay: `${Math.random() * 3}s`,
+                      animationDuration: `${Math.random() * 2 + 2}s`,
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {/* Cosmic gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-indigo-900/10 rounded-2xl" />
+              
               <div className="relative">
+                {/* Star name header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-yellow-300 font-semibold text-lg">
+                    {selectedStar.star_name}
+                  </h3>
+                </div>
+                
                 {/* Delete button for star owners and admins */}
                 {(user && (selectedStar.profile_id === user.id || isAdmin)) && (
                   <button
                     onClick={() => handleDeleteStar(selectedStar.id)}
-                    className="absolute -top-1 -right-1 text-red-400 hover:text-red-300 transition-colors duration-200 bg-gray-800 rounded-full p-1"
+                    className="absolute -top-2 -right-2 text-red-400 hover:text-red-300 transition-all duration-200 bg-gray-800/80 hover:bg-red-900/50 rounded-full p-2 backdrop-blur-sm border border-gray-600/50 hover:border-red-500/50"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 )}
+                
                 {/* Star message content */}
-                <p className="text-white text-base sm:text-lg font-medium leading-relaxed">
+                <div className="bg-black/20 rounded-xl p-4 mb-4 border border-gray-600/30">
+                  <p className="text-white text-base sm:text-lg font-medium leading-relaxed">
+                    "{selectedStar.message}"
+                  </p>
+                </div>
+                
+                {/* Author and metadata */}
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-300 text-sm">
+                    {selectedStar.profiles?.display_name && !selectedStar.profiles?.hide_display_name ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full"></div>
+                        <span>By: {selectedStar.profiles.display_name}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full"></div>
+                        <span>Anonymous Star</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-gray-400 text-xs">
+                    {new Date(selectedStar.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+                
+                {/* Close instruction */}
+                <div className="mt-4 pt-3 border-t border-gray-600/30 text-center">
+                  <div className="text-gray-400 text-xs flex items-center justify-center gap-2">
+                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse"></div>
+                    <span>Click anywhere to close</span>
+                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
                   {selectedStar.message}
                 </p>
                 {/* Author information if not hidden */}
