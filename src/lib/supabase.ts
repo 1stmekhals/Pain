@@ -8,19 +8,32 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
 // Get Supabase anonymous key from environment variables and trim whitespace
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
+// Log environment variables for debugging (only in development)
+if (import.meta.env.DEV) {
+  console.log('Environment check:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    url: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'missing'
+  });
+}
+
 // Check if required environment variables are present
 if (!supabaseUrl || !supabaseAnonKey) {
-  // Throw error with helpful message if credentials are missing
-  throw new Error(
-    'Missing Supabase credentials. Please click the "Connect to Supabase" button in the top right corner to set up your database connection.'
-  );
+  // Log error for debugging
+  console.error('Missing Supabase credentials:', {
+    VITE_SUPABASE_URL: !!supabaseUrl,
+    VITE_SUPABASE_ANON_KEY: !!supabaseAnonKey
+  });
+  
+  // Don't throw error immediately, let the app handle it gracefully
+  console.warn('Supabase credentials missing - app will show connection error');
 }
 
 // Ensure URL doesn't end with a trailing slash for consistency
-const normalizedUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
+const normalizedUrl = supabaseUrl?.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
 
-// Create and export the Supabase client with configuration
-export const supabase = createClient(normalizedUrl, supabaseAnonKey, {
+// Create and export the Supabase client with configuration (only if credentials exist)
+export const supabase = normalizedUrl && supabaseAnonKey ? createClient(normalizedUrl, supabaseAnonKey, {
   auth: {
     persistSession: true, // Keep user session across browser refreshes
     autoRefreshToken: true, // Automatically refresh expired tokens
@@ -33,6 +46,46 @@ export const supabase = createClient(normalizedUrl, supabaseAnonKey, {
   },
   db: {
     schema: 'public' // Use the public schema
+  }
+}) : null as any; // Fallback to null if no credentials
+
+// Helper function to check if Supabase is properly configured
+export const isSupabaseConfigured = (): boolean => {
+  return !!(normalizedUrl && supabaseAnonKey && supabase);
+};
+
+// Helper function to get configuration status
+export const getSupabaseStatus = () => {
+  return {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    isConfigured: isSupabaseConfigured(),
+    url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'Not configured'
+  };
+};
+
+// Export a safe version of supabase that won't crash if not configured
+export const safeSupabase = {
+  ...supabase,
+  // Override methods to handle missing configuration gracefully
+  from: (table: string) => {
+    if (!supabase) {
+      return {
+        select: () => Promise.resolve({ data: [], error: new Error('Supabase not configured') }),
+        insert: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+        update: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+        delete: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+      } as any;
+    }
+    return supabase.from(table);
+  },
+  auth: supabase?.auth || {
+    getSession: () => Promise.resolve({ data: { session: null }, error: new Error('Supabase not configured') }),
+    signInWithPassword: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+    signUp: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
+    signOut: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+  } as any
+};
   }
 });
 

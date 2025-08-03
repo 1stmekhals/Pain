@@ -41,6 +41,12 @@ import { PlusCircle, LogIn, LogOut, X, Trash2, UserCircle, Users, AlertCircle, R
 import { motion, AnimatePresence } from 'framer-motion';
 // Import Framer Motion for smooth animations and transitions
 
+// Check if environment variables are available
+const hasSupabaseCredentials = !!(
+  import.meta.env.VITE_SUPABASE_URL?.trim() && 
+  import.meta.env.VITE_SUPABASE_ANON_KEY?.trim()
+);
+
 // Main App component - the root component of the application
 function App() {
   // Check if current page is password reset page by examining URL pathname and hash
@@ -50,6 +56,52 @@ function App() {
   // If it's password reset page, render only the password reset component
   if (isPasswordResetPage) {
     return <PasswordResetPage />;
+  }
+
+  // If no Supabase credentials, show setup message
+  if (!hasSupabaseCredentials) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="bg-gray-900 p-8 rounded-lg max-w-2xl w-full text-center">
+          <div className="mb-6">
+            <AlertCircle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-white mb-4">
+              Setup Required
+            </h1>
+          </div>
+          
+          <div className="text-gray-300 text-left mb-6 space-y-4">
+            <p>This application requires Supabase credentials to function properly.</p>
+            
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h3 className="text-white font-semibold mb-2">Missing Environment Variables:</h3>
+              <ul className="text-sm space-y-1">
+                <li>• VITE_SUPABASE_URL</li>
+                <li>• VITE_SUPABASE_ANON_KEY</li>
+              </ul>
+            </div>
+            
+            <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-700">
+              <h3 className="text-blue-400 font-semibold mb-2">For Netlify Deployment:</h3>
+              <ol className="text-sm space-y-1 list-decimal list-inside">
+                <li>Go to your Netlify dashboard</li>
+                <li>Select this site</li>
+                <li>Go to Site settings → Environment variables</li>
+                <li>Add the required Supabase credentials</li>
+                <li>Redeploy the site</li>
+              </ol>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry After Setup
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // State for managing all stars displayed in the sky
