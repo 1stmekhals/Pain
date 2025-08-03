@@ -86,8 +86,6 @@ export const safeSupabase = {
     signOut: () => Promise.resolve({ error: new Error('Supabase not configured') }),
   } as any
 };
-  }
-});
 
 // Helper function to determine if error is CORS-related
 const isCorsError = (error: any): boolean => {
