@@ -568,6 +568,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
             top: `${star.y}%`,
             // Center the star and move it with the sky at 80% speed for realistic parallax
             transform: `translate(-50%, -50%) translateX(${normalizedOffset * 0.8}px)`,
+            willChange: 'transform',
             // Higher z-index when hovered
             zIndex: hoveredStar === star.id ? 10 : 1,
           }}
@@ -583,8 +584,17 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           onMouseEnter={() => setHoveredStar(star.id)}
           onMouseLeave={() => setHoveredStar(null)}
           // Prevent star events from interfering with sky dragging
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
         >
           <div className="relative">
             {/* Multi-layered star rendering for realistic appearance */}
