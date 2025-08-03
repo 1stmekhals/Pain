@@ -119,8 +119,8 @@ export const CreateStarModal: React.FC<CreateStarModalProps> = ({
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Write your message (max 250 characters)"
-            maxLength={250}
+            placeholder="Write your message (max 500 characters)"
+            maxLength={500}
             required
             className="w-full h-32 p-3 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
           />
