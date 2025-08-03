@@ -64,29 +64,6 @@ export const getSupabaseStatus = () => {
   };
 };
 
-// Export a safe version of supabase that won't crash if not configured
-export const safeSupabase = {
-  ...supabase,
-  // Override methods to handle missing configuration gracefully
-  from: (table: string) => {
-    if (!supabase) {
-      return {
-        select: () => Promise.resolve({ data: [], error: new Error('Supabase not configured') }),
-        insert: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
-        update: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
-        delete: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
-      } as any;
-    }
-    return supabase.from(table);
-  },
-  auth: supabase?.auth || {
-    getSession: () => Promise.resolve({ data: { session: null }, error: new Error('Supabase not configured') }),
-    signInWithPassword: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
-    signUp: () => Promise.resolve({ data: null, error: new Error('Supabase not configured') }),
-    signOut: () => Promise.resolve({ error: new Error('Supabase not configured') }),
-  } as any
-};
-
 // Helper function to determine if error is CORS-related
 const isCorsError = (error: any): boolean => {
   // Get error message in lowercase for case-insensitive checking
