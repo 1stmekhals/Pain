@@ -387,16 +387,20 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
 
   return (
     <>
-      <div className={`fixed bottom-4 left-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 bg-gray-900 bg-opacity-80 p-3 rounded-lg sm:rounded-full backdrop-blur-sm ${className}`}>
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`fixed bottom-4 left-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 glass-dark p-3 rounded-xl sm:rounded-full shadow-lg ${className}`}
+      >
         {isAdmin && (
           <div className="relative">
             <label className={`
-              cursor-pointer hover:opacity-80 transition-opacity 
+              cursor-pointer hover:scale-105 transition-all duration-300
               flex items-center gap-2 px-3 py-1.5 
-              ${isUploading ? 'bg-gray-600' : 'bg-indigo-600'} 
-              rounded-full text-white text-sm
+              ${isUploading ? 'bg-gray-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600'} 
+              rounded-full text-white text-sm shadow-lg hover:shadow-xl
             `}>
-              <Upload className="w-4 h-4" />
+              <Upload className={`w-4 h-4 ${isUploading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">
                 {isUploading ? 'Uploading...' : 'Upload Music'}
               </span>
@@ -410,11 +414,15 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
               />
             </label>
             {uploadError && (
-              <div className="absolute top-full mt-2 left-0 right-0 text-center whitespace-nowrap">
-                <span className="text-red-400 text-xs bg-gray-800 px-2 py-1 rounded">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute top-full mt-2 left-0 right-0 text-center whitespace-nowrap"
+              >
+                <span className="text-red-400 text-xs glass-dark px-2 py-1 rounded-lg shadow-lg">
                   {uploadError}
                 </span>
-              </div>
+              </motion.div>
             )}
           </div>
         )}
@@ -422,7 +430,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         <div className="flex items-center gap-2">
           <button
             onClick={toggleMute}
-            className="text-white hover:opacity-80 transition-opacity"
+            className="text-white hover:scale-110 hover:text-blue-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
             disabled={playlist.length === 0}
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -430,7 +438,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
 
           <button
             onClick={togglePlayPause}
-            className="text-white hover:opacity-80 transition-opacity"
+            className="text-white hover:scale-110 hover:text-green-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
             disabled={playlist.length === 0}
           >
             {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -438,7 +446,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
 
           <button
             onClick={playNextTrack}
-            className="text-white hover:opacity-80 transition-opacity"
+            className="text-white hover:scale-110 hover:text-purple-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
             disabled={playlist.length === 0}
           >
             <SkipForward className="w-5 h-5" />
@@ -446,7 +454,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
 
           <button
             onClick={() => setShowPlaylist(!showPlaylist)}
-            className="text-white hover:opacity-80 transition-opacity"
+            className="text-white hover:scale-110 hover:text-yellow-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
             disabled={playlist.length === 0}
           >
             <List className="w-5 h-5" />
@@ -454,12 +462,16 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         </div>
 
         {currentTrack ? (
-          <div className="flex items-center gap-2">
-            <Music className="w-4 h-4 text-white opacity-60" />
-            <span className="text-white text-sm truncate max-w-[120px] sm:max-w-[150px]">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2"
+          >
+            <Music className="w-4 h-4 text-purple-300 animate-pulse" />
+            <span className="text-white text-sm truncate max-w-[120px] sm:max-w-[150px] font-medium">
               {currentTrack.title}
             </span>
-          </div>
+          </motion.div>
         ) : playlist.length > 0 ? (
           <span className="text-gray-400 text-sm">Select a track</span>
         ) : isAdmin ? (
@@ -469,16 +481,20 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         )}
 
         {fetchError && (
-          <div className="flex items-center gap-1">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-1"
+          >
             <AlertCircle className="w-3 h-3 text-red-400" />
-            <span className="text-red-400 text-xs bg-gray-800 px-2 py-1 rounded">
+            <span className="text-red-400 text-xs glass-dark px-2 py-1 rounded-lg">
               {fetchError}
             </span>
-          </div>
+          </motion.div>
         )}
 
         <audio ref={audioRef} loop={false} muted className="hidden" />
-      </div>
+      </motion.div>
 
       {/* Playlist Modal */}
       <AnimatePresence>

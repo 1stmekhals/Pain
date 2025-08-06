@@ -162,7 +162,12 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   return (
     <div 
       className="absolute inset-0 overflow-hidden select-none touch-none"
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      style={{ 
+        cursor: isDragging ? 'grabbing' : 'grab',
+        willChange: 'transform',
+        backfaceVisibility: 'hidden',
+        perspective: '1000px'
+      }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -173,7 +178,21 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       {/* Main sky container with drag controls and touch handling */}
       
       <motion.div 
-        className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-slate-900 to-black"
+        className="absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(ellipse at top, rgba(30, 27, 75, 0.8) 0%, transparent 50%),
+            radial-gradient(ellipse at bottom, rgba(15, 23, 42, 0.6) 0%, transparent 50%),
+            linear-gradient(180deg, 
+              #0f0f23 0%, 
+              #1a1a2e 25%, 
+              #16213e 50%, 
+              #0f3460 75%, 
+              #000000 100%
+            )
+          `,
+          willChange: 'transform'
+        }}
       >
         {/* Dynamic sky background gradient */}
         {/* Dynamic sky background based on time */}

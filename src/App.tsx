@@ -632,9 +632,17 @@ function App() {
 
       {/* Error message display at top of screen */}
       {error && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in max-w-[90%] sm:max-w-md text-center">
-          {error}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -50, scale: 0.9 }}
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 glass-dark border border-red-500/30 text-red-300 px-6 py-3 rounded-xl shadow-2xl z-50 max-w-[90%] sm:max-w-md text-center backdrop-blur-xl"
+        >
+          <div className="flex items-center gap-2 justify-center">
+            <AlertCircle className="w-4 h-4 animate-pulse" />
+            <span className="font-medium">{error}</span>
+          </div>
+        </motion.div>
       )}
 
       {/* Settings modal with animation */}
@@ -648,7 +656,11 @@ function App() {
       </AnimatePresence>
       
       {/* Hamburger navigation menu */}
-      <div className="fixed top-4 right-4 z-10">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed top-4 right-4 z-10"
+      >
         <HamburgerMenu
           isAuthenticated={!!user} // Convert user to boolean
           isAdmin={isAdmin}
@@ -660,25 +672,31 @@ function App() {
           onSignInClick={() => setIsAuthModalOpen(true)}
           onSettingsClick={() => setShowSettings(true)}
         />
-      </div>
+      </motion.div>
 
       {/* Selected star message popup */}
       <AnimatePresence>
         {selectedStar && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 30 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            initial={{ opacity: 0, scale: 0.7, y: 50, rotateX: -15 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, scale: 0.7, y: 50, rotateX: -15 }}
+            transition={{ 
+              type: "spring", 
+              damping: 20, 
+              stiffness: 300,
+              duration: 0.4
+            }}
             className="fixed bottom-20 sm:bottom-8 left-4 right-4 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 z-50 star-message"
+            style={{ perspective: '1000px' }}
           >
-            <div className="relative bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 p-6 rounded-2xl sm:max-w-lg backdrop-blur-xl border border-gray-600/50 shadow-2xl overflow-hidden">
+            <div className="relative glass-dark p-6 rounded-2xl sm:max-w-lg shadow-2xl overflow-hidden border border-white/10">
               {/* Animated background stars */}
               <div className="absolute inset-0 overflow-hidden">
                 {Array.from({ length: 15 }).map((_, i) => (
                   <div
                     key={`msg-star-${i}`}
-                    className="absolute bg-white rounded-full animate-pulse opacity-20"
+                    className="absolute bg-white rounded-full animate-pulse opacity-30"
                     style={{
                       left: `${Math.random() * 100}%`,
                       top: `${Math.random() * 100}%`,
@@ -692,67 +710,91 @@ function App() {
               </div>
               
               {/* Cosmic gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-indigo-900/10 rounded-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20 rounded-2xl" />
               
               <div className="relative">
                 {/* Star name header */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="flex items-center gap-3 mb-4"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-yellow-300 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-glow">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
                       <path d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z" />
                     </svg>
                   </div>
-                  <h3 className="text-yellow-300 font-semibold text-lg">
+                  <h3 className="text-yellow-300 font-bold text-xl bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                     {selectedStar.star_name}
                   </h3>
-                </div>
+                </motion.div>
                 
                 {/* Delete button for star owners and admins */}
                 {(user && (selectedStar.profile_id === user.id || isAdmin)) && (
-                  <button
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => handleDeleteStar(selectedStar.id)}
-                    className="absolute -top-2 -right-2 text-red-400 hover:text-red-300 transition-all duration-200 bg-gray-800/80 hover:bg-red-900/50 rounded-full p-2 backdrop-blur-sm border border-gray-600/50 hover:border-red-500/50"
+                    className="absolute -top-2 -right-2 text-red-400 hover:text-red-300 transition-all duration-300 glass-dark hover:bg-red-900/30 rounded-full p-2 border border-red-500/30 hover:border-red-500/60 shadow-lg"
                   >
                     <Trash2 size={14} />
-                  </button>
+                  </motion.button>
                 )}
                 
                 {/* Star message content */}
-                <div className="bg-black/20 rounded-xl p-4 mb-4 border border-gray-600/30">
-                  <p className="text-white text-base sm:text-lg font-medium leading-relaxed">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="glass rounded-xl p-5 mb-5 border border-white/20 shadow-inner"
+                >
+                  <p className="text-white text-base sm:text-lg font-medium leading-relaxed tracking-wide">
                     "{selectedStar.message}"
                   </p>
-                </div>
+                </motion.div>
                 
                 {/* Author and metadata */}
-                <div className="flex items-center justify-between">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex items-center justify-between"
+                >
                   <div className="text-gray-300 text-sm">
                     {selectedStar.profiles?.display_name && !selectedStar.profiles?.hide_display_name ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full"></div>
-                        <span>By: {selectedStar.profiles.display_name}</span>
+                        <div className="w-4 h-4 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full animate-pulse"></div>
+                        <span className="font-medium">By: {selectedStar.profiles.display_name}</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full"></div>
-                        <span>Anonymous Star</span>
+                        <div className="w-4 h-4 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full animate-pulse"></div>
+                        <span className="font-medium">Anonymous Star</span>
                       </div>
                     )}
                   </div>
                   
-                  <div className="text-gray-400 text-xs">
+                  <div className="text-gray-400 text-xs font-medium">
                     {new Date(selectedStar.created_at).toLocaleDateString()}
                   </div>
-                </div>
+                </motion.div>
                 
                 {/* Close instruction */}
-                <div className="mt-4 pt-3 border-t border-gray-600/30 text-center">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="mt-5 pt-4 border-t border-white/20 text-center"
+                >
                   <div className="text-gray-400 text-xs flex items-center justify-center gap-2">
-                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse"></div>
-                    <span>Click anywhere to close</span>
-                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse"></div>
+                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="font-medium">Click anywhere to close</span>
+                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
                   </div>
-                </div>
+                </motion.div>
               </div>
             </div>
           </motion.div>

@@ -100,12 +100,13 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
       {/* Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-12 h-12 bg-gray-900 bg-opacity-80 text-white rounded-full hover:bg-opacity-100 transition-all duration-300 backdrop-blur-sm border border-gray-700"
+        className="flex items-center justify-center w-12 h-12 glass-dark text-white rounded-full hover:scale-110 hover:shadow-lg transition-all duration-300 group"
         aria-label="Menu"
       >
         <motion.div
           animate={{ rotate: isOpen ? 90 : 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+          className="group-hover:scale-110 transition-transform duration-200"
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
         </motion.div>
@@ -115,21 +116,33 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="absolute top-14 right-0 w-48 bg-gray-900 bg-opacity-95 backdrop-blur-md rounded-lg shadow-2xl border border-gray-700 py-2 z-50"
+            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+            transition={{ 
+              duration: 0.2, 
+              type: "spring", 
+              stiffness: 300, 
+              damping: 25 
+            }}
+            className="absolute top-14 right-0 w-52 glass-dark rounded-xl shadow-2xl py-3 z-50 overflow-hidden"
           >
+            {/* Subtle animated background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-indigo-900/10" />
+            
             {menuItems.map((item, index) => (
-              <button
+              <motion.button
                 key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
                 onClick={() => handleMenuItemClick(item.action)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-800 transition-colors ${item.color}`}
+                className={`relative w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/10 transition-all duration-200 group ${item.color}`}
               >
-                <item.icon size={18} />
-                <span className="font-medium">{item.label}</span>
-              </button>
+                <div className="absolute left-0 top-0 h-full w-1 bg-current opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                <item.icon size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                <span className="font-medium group-hover:translate-x-1 transition-transform duration-200">{item.label}</span>
+              </motion.button>
             ))}
           </motion.div>
         )}

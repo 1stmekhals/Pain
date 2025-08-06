@@ -26,23 +26,27 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
 
   return (
     <div className="fixed top-4 left-4 z-10">
-      <div className="bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg p-3 border border-gray-700">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-dark rounded-xl p-4 shadow-lg animate-float"
+      >
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {isDayTime ? (
-              <Sun className="w-4 h-4 text-yellow-300" />
+              <Sun className="w-4 h-4 text-yellow-300 animate-pulse" />
             ) : (
-              <Moon className="w-4 h-4 text-blue-200" />
+              <Moon className="w-4 h-4 text-blue-200 animate-pulse" />
             )}
             {currentSky === 'general' ? (
-              <Globe className="w-5 h-5 text-blue-400" />
+              <Globe className="w-5 h-5 text-blue-400 animate-pulse" />
             ) : (
-              <User className="w-5 h-5 text-purple-400" />
+              <User className="w-5 h-5 text-purple-400 animate-pulse" />
             )}
             <span className="text-white text-sm font-medium">
               {getSkyDisplayName()}
             </span>
-            <span className="text-gray-400 text-xs">
+            <span className="text-gray-300 text-xs opacity-75">
               ({isDayTime ? 'Day' : 'Night'})
             </span>
           </div>
@@ -52,8 +56,8 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
               onClick={() => onSkyChange('general')}
               className={`px-3 py-1 rounded-full text-xs transition-all ${
                 currentSky === 'general'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-blue-600 text-white shadow-lg animate-glow'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:scale-105'
               }`}
             >
               General
@@ -64,8 +68,8 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
                 onClick={() => onSkyChange('user')}
                 className={`px-3 py-1 rounded-full text-xs transition-all ${
                   currentSky === 'user'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    ? 'bg-purple-600 text-white shadow-lg animate-glow'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:scale-105'
                 }`}
               >
                 {viewingUserId ? 'User Sky' : 'My Sky'}
@@ -73,7 +77,7 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
