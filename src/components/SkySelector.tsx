@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Globe, User, Sun, Moon } from 'lucide-react';
 
 interface SkySelectorProps {
