@@ -249,8 +249,9 @@ function App() {
 
       // Store profile data in state
       setUserProfile(profile);
-      // If profile doesn't exist or is incomplete, show profile modal
-      if (!profile || !profile.is_profile_complete) {
+      // Only show profile modal if profile doesn't exist at all
+      // (This handles edge cases where auto-creation might have failed)
+      if (!profile) {
         setShowProfileModal(true);
       }
     } catch (err) {

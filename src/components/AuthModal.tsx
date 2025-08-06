@@ -124,7 +124,56 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
 
     try {
+      // Check if username is already taken
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingProfile) {
+        setError('Username is already taken. Please choose a different username.');
+        setIsLoading(false);
+        return;
+      }
+
       await signUp(email, password);
+      
+      // Get the newly created user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error getting user after signup:', userError);
+        // Don't throw error here as signup was successful
+      } else if (user) {
+        // Create profile automatically
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              first_name: firstName,
+              last_name: lastName,
+              username: username,
+              display_name: displayName || `${firstName} ${lastName}`,
+              hide_display_name: false,
+              is_profile_complete: true,
+            });
+
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            // Don't throw error here as signup was successful
+          }
+        } catch (profileErr) {
+          console.error('Error creating profile:', profileErr);
+          // Don't throw error here as signup was successful
+        }
+      }
+      
       setSuccess('Account created successfully! Please check your email to confirm your account before signing in.');
       setMode('signin');
       resetForm();
