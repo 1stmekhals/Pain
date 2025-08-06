@@ -17,9 +17,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +29,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setFirstName('');
-    setLastName('');
-    setUsername('');
     setError(null);
     setSuccess(null);
     setShowPassword(false);
@@ -59,19 +53,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
     if (!/(?=.*\d)/.test(password)) {
       return 'Password must contain at least one number';
-    }
-    return null;
-  };
-
-  const validateUsername = (username: string): string | null => {
-    if (username.length < 3) {
-      return 'Username must be at least 3 characters long';
-    }
-    if (username.length > 20) {
-      return 'Username must be less than 20 characters';
-    }
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      return 'Username can only contain letters, numbers, and underscores';
     }
     return null;
   };
@@ -116,64 +97,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    const usernameError = validateUsername(username);
-    if (usernameError) {
-      setError(usernameError);
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      // Check if username is already taken
-      const { data: existingProfile, error: checkError } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .maybeSingle();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      if (existingProfile) {
-        setError('Username is already taken. Please choose a different username.');
-        setIsLoading(false);
-        return;
-      }
-
       await signUp(email, password);
-      
-      // Get the newly created user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        console.error('Error getting user after signup:', userError);
-        // Don't throw error here as signup was successful
-      } else if (user) {
-        // Create profile automatically
-        try {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              first_name: firstName,
-              last_name: lastName,
-              username: username,
-              display_name: displayName || `${firstName} ${lastName}`,
-              hide_display_name: false,
-              is_profile_complete: true,
-            });
-
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-            // Don't throw error here as signup was successful
-          }
-        } catch (profileErr) {
-          console.error('Error creating profile:', profileErr);
-          // Don't throw error here as signup was successful
-        }
-      }
-      
       setSuccess('Account created successfully! Please check your email to confirm your account before signing in.');
       setMode('signin');
       resetForm();
@@ -382,58 +307,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 {/* Form Fields */}
                 {mode === 'signup' && (
                   <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">
-                          First Name
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all backdrop-blur-sm"
-                            placeholder="John"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">
-                          Last Name
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all backdrop-blur-sm"
-                            placeholder="Doe"
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">
-                        Username
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
-                        <input
-                          type="text"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                          className="w-full pl-11 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all backdrop-blur-sm"
-                          placeholder="johndoe"
-                          required
-                        />
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        3-20 characters, letters, numbers, and underscores only
-                      </p>
-                    </div>
                   </>
                 )}
 
