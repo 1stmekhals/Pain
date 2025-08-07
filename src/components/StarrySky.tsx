@@ -213,7 +213,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
           normalizedOffset={normalizedOffset}
           SKY_CIRCUMFERENCE={SKY_CIRCUMFERENCE}
         />
-      )}
+      ))}
 
       {/* Interactive user-created stars - visible in both day and night */}
       {stars.map((star) => (
