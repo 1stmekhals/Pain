@@ -21,8 +21,8 @@ export const InteractiveStar: React.FC<InteractiveStarProps> = ({
 }) => {
   // Move useTransform to component level to avoid hooks in loops
   const starTransform = useTransform(
-    normalizedOffset, 
-    (value) => `calc(-50% + ${value * 0.8}px)`
+    normalizedOffset,
+    (value) => value * 0.8
   );
 
   return (
@@ -34,11 +34,8 @@ export const InteractiveStar: React.FC<InteractiveStarProps> = ({
         x: "-50%",
         y: "-50%"
       }}
-      animate={{
-        x: starTransform
-      }}
-      transition={{ type: "tween", duration: 0 }}
       style={{
+        x: starTransform,
         willChange: 'transform',
         zIndex: hoveredStar === star.id ? 10 : 1,
       }}

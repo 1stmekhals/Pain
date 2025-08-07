@@ -15,32 +15,32 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
   // Move useTransform calls to component level to avoid hooks in loops
   const bgStarsTransform = useTransform(
     normalizedOffset, 
-    (value) => (value * 0.2) + (segment * SKY_CIRCUMFERENCE * 0.2)
+    (value) => value * 0.2
   );
   
   const largeStarsTransform = useTransform(
     normalizedOffset, 
-    (value) => (value * 0.3) + (segment * SKY_CIRCUMFERENCE * 0.3)
+    (value) => value * 0.3
   );
   
   const clusterTransform = useTransform(
     normalizedOffset, 
-    (value) => (value * 0.4) + (segment * SKY_CIRCUMFERENCE * 0.4)
+    (value) => value * 0.4
   );
   
   const nebulaTransform = useTransform(
     normalizedOffset, 
-    (value) => (value * 0.6) + (segment * SKY_CIRCUMFERENCE * 0.6)
+    (value) => value * 0.6
   );
   
   const milkyWayTransform = useTransform(
     normalizedOffset, 
-    (value) => (value * 0.1) + (segment * SKY_CIRCUMFERENCE * 0.1)
+    (value) => value * 0.1
   );
   
   const moonTransform = useTransform(
     normalizedOffset, 
-    (value) => (value * 0.3) + (segment * SKY_CIRCUMFERENCE * 0.3)
+    (value) => value * 0.3
   );
 
   return (
@@ -51,12 +51,9 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
         style={{
           left: `${segment * 100 - 100}%`,
           width: '100%',
-          willChange: 'transform'
-        }}
-        animate={{
+          willChange: 'transform',
           x: bgStarsTransform
         }}
-        transition={{ type: "tween", duration: 0 }}
       >
         {Array.from({ length: 300 }).map((_, i) => {
           const size = Math.random() * 2 + 0.5;
@@ -84,12 +81,9 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
         style={{
           left: `${segment * 100 - 100}%`,
           width: '100%',
-          willChange: 'transform'
-        }}
-        animate={{
+          willChange: 'transform',
           x: largeStarsTransform
         }}
-        transition={{ type: "tween", duration: 0 }}
       >
         {Array.from({ length: 40 }).map((_, i) => {
           const size = Math.random() * 3 + 2;
@@ -117,12 +111,9 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
         style={{
           left: `${segment * 100 - 100}%`,
           width: '100%',
-          willChange: 'transform'
-        }}
-        animate={{
+          willChange: 'transform',
           x: clusterTransform
         }}
-        transition={{ type: "tween", duration: 0 }}
       >
         {Array.from({ length: 15 }).map((_, i) => {
           const clusterX = Math.random() * 80 + 10;
@@ -159,12 +150,9 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
         style={{
           left: `${segment * 100 - 100}%`,
           width: '100%',
-          willChange: 'transform'
-        }}
-        animate={{
+          willChange: 'transform',
           x: nebulaTransform
         }}
-        transition={{ type: "tween", duration: 0 }}
       >
         {Array.from({ length: 3 }).map((_, i) => (
           <div
@@ -190,12 +178,9 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
           width: '100%',
           background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 55%, transparent 70%)',
           rotate: '-15deg',
-          willChange: 'transform'
-        }}
-        animate={{
+          willChange: 'transform',
           x: milkyWayTransform
         }}
-        transition={{ type: "tween", duration: 0 }}
       />
 
       {/* Moon */}
@@ -205,12 +190,9 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
           right: '10%',
           top: '10%',
           left: `${segment * 100 + 80}%`,
-          willChange: 'transform'
-        }}
-        animate={{
+          willChange: 'transform',
           x: moonTransform
         }}
-        transition={{ type: "tween", duration: 0 }}
       >
         <div className="relative w-full h-full">
           <div
