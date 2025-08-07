@@ -2,7 +2,7 @@
 // Handles 360-degree sky exploration with drag/touch controls and star interactions
 import React, { useState, useEffect } from 'react';
 // Import Framer Motion for smooth animations
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 // Import Star type for TypeScript type safety
 import { Star } from '../types/star';
 
@@ -20,12 +20,13 @@ interface StarrySkyProps {
 export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayTime = false }) => {
   // State for tracking which star is currently being hovered
   const [hoveredStar, setHoveredStar] = useState<string | null>(null);
-  // State for tracking horizontal offset of the sky (for 360° exploration)
-  const [skyOffset, setSkyOffset] = useState(0);
   // State for tracking if user is currently dragging the sky
   const [isDragging, setIsDragging] = useState(false);
   // State for storing drag start position and initial offset
   const [dragStart, setDragStart] = useState({ x: 0, offset: 0 });
+  
+  // Use Framer Motion's useMotionValue for smooth, hardware-accelerated animations
+  const skyOffset = useMotionValue(0);
   
   // Force night time display - ignore isDayTime prop for now
   // Force night time - ignore isDayTime prop
@@ -36,8 +37,10 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
   const SKY_CIRCUMFERENCE = 3600; // 10x screen width for smooth 360° experience
 
   // Normalize sky offset to create seamless 360-degree loop
-  // Normalize sky offset to create 360-degree loop
-  const normalizedOffset = ((skyOffset % SKY_CIRCUMFERENCE) + SKY_CIRCUMFERENCE) % SKY_CIRCUMFERENCE;
+  const normalizedOffset = useTransform(
+    skyOffset,
+    (value) => ((value % SKY_CIRCUMFERENCE) + SKY_CIRCUMFERENCE) % SKY_CIRCUMFERENCE
+  );
 
   // Handle mouse down event to start dragging
   // Handle mouse events
@@ -49,7 +52,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
     // Store initial mouse position and current offset
     setDragStart({
       x: e.clientX,
-      offset: skyOffset
+      offset: skyOffset.get()
     });
   };
 
@@ -63,8 +66,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       // Calculate how far mouse has moved
       const deltaX = e.clientX - dragStart.x;
       // Update sky offset based on mouse movement
-      const newOffset = dragStart.offset + deltaX;
-      setSkyOffset(newOffset);
+      const newOffset = dragStart.offset + deltaX * 1.2; // Slightly faster movement for better feel
+      skyOffset.set(newOffset);
     }
   };
 
@@ -83,7 +86,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
     // Store initial touch position and offset
     setDragStart({
       x: e.touches[0].clientX,
-      offset: skyOffset
+      offset: skyOffset.get()
     });
   };
 
@@ -96,8 +99,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       // Calculate touch movement distance
       const deltaX = e.touches[0].clientX - dragStart.x;
       // Update sky offset
-      const newOffset = dragStart.offset + deltaX;
-      setSkyOffset(newOffset);
+      const newOffset = dragStart.offset + deltaX * 1.2; // Enhanced touch sensitivity
+      skyOffset.set(newOffset);
     }
   };
 
@@ -115,8 +118,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
         e.preventDefault();
         // Calculate movement and update offset
         const deltaX = e.touches[0].clientX - dragStart.x;
-        const newOffset = dragStart.offset + deltaX;
-        setSkyOffset(newOffset);
+        const newOffset = dragStart.offset + deltaX * 1.2;
+        skyOffset.set(newOffset);
       }
     };
 
@@ -132,8 +135,8 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
         e.preventDefault();
         // Calculate movement and update offset
         const deltaX = e.clientX - dragStart.x;
-        const newOffset = dragStart.offset + deltaX;
-        setSkyOffset(newOffset);
+        const newOffset = dragStart.offset + deltaX * 1.2;
+        skyOffset.set(newOffset);
       }
     };
 
@@ -161,12 +164,13 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
   return (
     <div 
-      className="absolute inset-0 overflow-hidden select-none touch-none"
+      className="absolute inset-0 overflow-hidden select-none"
       style={{ 
         cursor: isDragging ? 'grabbing' : 'grab',
-        willChange: 'transform',
-        backfaceVisibility: 'hidden',
-        perspective: '1000px'
+        touchAction: 'pan-x',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
+        WebkitTapHighlightColor: 'transparent'
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -174,6 +178,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onContextMenu={(e) => e.preventDefault()}
     >
       {/* Main sky container with drag controls and touch handling */}
       
@@ -201,16 +206,19 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       {/* Static background stars - small twinkling stars */}
       {/* Night sky elements */}
       {/* Static background stars */}
-      {Array.from({ length: 3 }).map((segment) => (
+      {Array.from({ length: 3 }).map((_, segment) => (
         <motion.div 
           key={`bg-segment-${segment}`}
           className="absolute inset-0"
-          style={{ 
-            // Move at 20% speed with proper segmentation for 360° loop
-            transform: `translateX(${(normalizedOffset * 0.2) + (segment * SKY_CIRCUMFERENCE * 0.2)}px)`,
+          style={{
             left: `${segment * 100 - 100}%`,
-            width: '100%'
+            width: '100%',
+            willChange: 'transform'
           }}
+          animate={{
+            x: useTransform(normalizedOffset, (value) => (value * 0.2) + (segment * SKY_CIRCUMFERENCE * 0.2))
+          }}
+          transition={{ type: "tween", duration: 0 }}
         >
           {/* Generate 300 small background stars per segment */}
           {Array.from({ length: 300 }).map((_, i) => {
@@ -240,16 +248,19 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
       {/* Larger background stars for depth */}
       {/* Larger background stars */}
-      {Array.from({ length: 3 }).map((segment) => (
+      {Array.from({ length: 3 }).map((_, segment) => (
         <motion.div 
           key={`large-segment-${segment}`}
           className="absolute inset-0"
-          style={{ 
-            // Move at 30% speed for parallax effect
-            transform: `translateX(${(normalizedOffset * 0.3) + (segment * SKY_CIRCUMFERENCE * 0.3)}px)`,
+          style={{
             left: `${segment * 100 - 100}%`,
-            width: '100%'
+            width: '100%',
+            willChange: 'transform'
           }}
+          animate={{
+            x: useTransform(normalizedOffset, (value) => (value * 0.3) + (segment * SKY_CIRCUMFERENCE * 0.3))
+          }}
+          transition={{ type: "tween", duration: 0 }}
         >
           {/* Generate 40 larger stars per segment */}
           {Array.from({ length: 40 }).map((_, i) => {
@@ -277,16 +288,19 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
       {/* Constellation-like star clusters */}
       {/* Constellation-like star clusters */}
-      {Array.from({ length: 3 }).map((segment) => (
+      {Array.from({ length: 3 }).map((_, segment) => (
         <motion.div 
           key={`cluster-segment-${segment}`}
           className="absolute inset-0"
-          style={{ 
-            // Move at 40% speed
-            transform: `translateX(${(normalizedOffset * 0.4) + (segment * SKY_CIRCUMFERENCE * 0.4)}px)`,
+          style={{
             left: `${segment * 100 - 100}%`,
-            width: '100%'
+            width: '100%',
+            willChange: 'transform'
           }}
+          animate={{
+            x: useTransform(normalizedOffset, (value) => (value * 0.4) + (segment * SKY_CIRCUMFERENCE * 0.4))
+          }}
+          transition={{ type: "tween", duration: 0 }}
         >
           {/* Generate 15 star clusters per segment */}
           {Array.from({ length: 15 }).map((_, i) => {
@@ -325,16 +339,19 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
       {/* Nebula-like clouds for cosmic atmosphere */}
       {/* Nebula-like clouds */}
-      {Array.from({ length: 3 }).map((segment) => (
+      {Array.from({ length: 3 }).map((_, segment) => (
         <motion.div 
           key={`nebula-segment-${segment}`}
           className="absolute inset-0"
-          style={{ 
-            // Move at 60% speed
-            transform: `translateX(${(normalizedOffset * 0.6) + (segment * SKY_CIRCUMFERENCE * 0.6)}px)`,
+          style={{
             left: `${segment * 100 - 100}%`,
-            width: '100%'
+            width: '100%',
+            willChange: 'transform'
           }}
+          animate={{
+            x: useTransform(normalizedOffset, (value) => (value * 0.6) + (segment * SKY_CIRCUMFERENCE * 0.6))
+          }}
+          transition={{ type: "tween", duration: 0 }}
         >
           {/* Generate 3 nebula clouds per segment */}
           {Array.from({ length: 3 }).map((_, i) => (
@@ -359,37 +376,43 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
 
       {/* Milky Way band across the sky */}
       {/* Milky Way band */}
-      {Array.from({ length: 3 }).map((segment) => (
+      {Array.from({ length: 3 }).map((_, segment) => (
         <motion.div
           key={`milky-way-${segment}`}
           className="absolute inset-0 opacity-15"
           style={{
-            // Move at 10% speed (slowest for distant effect)
-            transform: `translateX(${(normalizedOffset * 0.1) + (segment * SKY_CIRCUMFERENCE * 0.1)}px)`,
             left: `${segment * 100 - 100}%`,
             width: '100%',
             // Diagonal gradient to simulate Milky Way
             background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 55%, transparent 70%)',
             // Rotate for diagonal appearance
             rotate: '-15deg',
+            willChange: 'transform'
           }}
+          animate={{
+            x: useTransform(normalizedOffset, (value) => (value * 0.1) + (segment * SKY_CIRCUMFERENCE * 0.1))
+          }}
+          transition={{ type: "tween", duration: 0 }}
         />
       ))}
 
       {/* Conditional rendering of Moon (night) or Sun (day) */}
       {/* Moon for all times (removed sun) */}
       {(
-        Array.from({ length: 3 }).map((segment) => (
+        Array.from({ length: 3 }).map((_, segment) => (
           <motion.div 
             key={`moon-${segment}`}
             className="absolute w-24 h-24"
-            style={{ 
-              // Move at 30% speed and position in top-right area
-              transform: `translateX(${(normalizedOffset * 0.3) + (segment * SKY_CIRCUMFERENCE * 0.3)}px)`,
+            style={{
               right: '10%',
               top: '10%',
               left: `${segment * 100 + 80}%`,
+              willChange: 'transform'
             }}
+            animate={{
+              x: useTransform(normalizedOffset, (value) => (value * 0.3) + (segment * SKY_CIRCUMFERENCE * 0.3))
+            }}
+            transition={{ type: "tween", duration: 0 }}
           >
             {/* Moon segments for night time */}
             {/* Moon for night time */}
@@ -581,14 +604,18 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
         <motion.div
           key={star.id}
           className="absolute cursor-pointer interactive-star"
-          style={{
-            // Position star and make it move with sky offset
+          initial={{
             left: `${star.x}%`,
             top: `${star.y}%`,
-            // Center the star and move it with the sky at 80% speed for realistic parallax
-            transform: `translate(-50%, -50%) translateX(${normalizedOffset * 0.8}px)`,
+            x: "-50%",
+            y: "-50%"
+          }}
+          animate={{
+            x: useTransform(normalizedOffset, (value) => `calc(-50% + ${value * 0.8}px)`)
+          }}
+          transition={{ type: "tween", duration: 0 }}
+          style={{
             willChange: 'transform',
-            // Higher z-index when hovered
             zIndex: hoveredStar === star.id ? 10 : 1,
           }}
           onClick={(e) => {

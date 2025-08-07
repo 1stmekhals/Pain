@@ -100,12 +100,12 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
       {/* Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-12 h-12 glass-dark text-white rounded-full hover:scale-110 hover:shadow-lg transition-all duration-300 group"
+        className="flex items-center justify-center w-12 h-12 glass-ultra text-white rounded-full hover:scale-110 hover:shadow-2xl transition-all duration-300 group backdrop-blur-xl"
         aria-label="Menu"
       >
         <motion.div
-          animate={{ rotate: isOpen ? 90 : 0 }}
-          transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.4, type: "spring", stiffness: 200, damping: 15 }}
           className="group-hover:scale-110 transition-transform duration-200"
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -116,32 +116,49 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+            initial={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
             transition={{ 
-              duration: 0.2, 
+              duration: 0.3, 
               type: "spring", 
               stiffness: 300, 
               damping: 25 
             }}
-            className="absolute top-14 right-0 w-52 glass-dark rounded-xl shadow-2xl py-3 z-50 overflow-hidden"
+            className="absolute top-14 right-0 w-52 glass-ultra rounded-2xl shadow-2xl py-3 z-50 overflow-hidden backdrop-blur-xl"
           >
             {/* Subtle animated background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-indigo-900/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
             
             {menuItems.map((item, index) => (
               <motion.button
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
+                initial={{ opacity: 0, x: -30, rotateY: -15 }}
+                animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                exit={{ opacity: 0, x: -30, rotateY: -15 }}
+                transition={{ 
+                  delay: index * 0.08,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25
+                }}
+                whileHover={{ 
+                  x: 8, 
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  transition: { duration: 0.2 }
+                }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleMenuItemClick(item.action)}
-                className={`relative w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/10 transition-all duration-200 group ${item.color}`}
+                className={`relative w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-300 group ${item.color} rounded-lg mx-2`}
               >
-                <div className="absolute left-0 top-0 h-full w-1 bg-current opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                <item.icon size={18} className="group-hover:scale-110 transition-transform duration-200" />
-                <span className="font-medium group-hover:translate-x-1 transition-transform duration-200">{item.label}</span>
+                <div className="absolute left-0 top-0 h-full w-1 bg-current opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-r-full" />
+                <motion.div
+                  whileHover={{ rotate: 5, scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <item.icon size={18} className="drop-shadow-sm" />
+                </motion.div>
+                <span className="font-medium drop-shadow-sm">{item.label}</span>
               </motion.button>
             ))}
           </motion.div>

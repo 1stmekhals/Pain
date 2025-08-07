@@ -30,51 +30,78 @@ export const SkySelector: React.FC<SkySelectorProps> = ({
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-dark rounded-xl p-4 shadow-lg animate-float"
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="glass-ultra rounded-2xl p-4 shadow-2xl"
+        whileHover={{ scale: 1.02, y: -2 }}
+        style={{ willChange: 'transform' }}
       >
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {isDayTime ? (
-              <Sun className="w-4 h-4 text-yellow-300 animate-pulse" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                <Sun className="w-4 h-4 text-yellow-300 drop-shadow-lg" />
+              </motion.div>
             ) : (
-              <Moon className="w-4 h-4 text-blue-200 animate-pulse" />
+              <motion.div
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Moon className="w-4 h-4 text-blue-200 drop-shadow-lg" />
+              </motion.div>
             )}
             {currentSky === 'general' ? (
-              <Globe className="w-5 h-5 text-blue-400 animate-pulse" />
+              <motion.div
+                animate={{ rotateY: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              >
+                <Globe className="w-5 h-5 text-blue-400 drop-shadow-lg" />
+              </motion.div>
             ) : (
-              <User className="w-5 h-5 text-purple-400 animate-pulse" />
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <User className="w-5 h-5 text-purple-400 drop-shadow-lg" />
+              </motion.div>
             )}
-            <span className="text-white text-sm font-medium">
+            <span className="text-white text-sm font-medium drop-shadow-sm">
               {getSkyDisplayName()}
             </span>
-            <span className="text-gray-300 text-xs opacity-75">
+            <span className="text-gray-300 text-xs opacity-75 drop-shadow-sm">
               ({isDayTime ? 'Day' : 'Night'})
             </span>
           </div>
           
           <div className="flex gap-2">
-            <button
+            <motion.button
               onClick={() => onSkyChange('general')}
-              className={`px-3 py-1 rounded-full text-xs transition-all ${
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
                 currentSky === 'general'
-                  ? 'bg-blue-600 text-white shadow-lg animate-glow'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:scale-105'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/20 backdrop-blur-sm'
               }`}
             >
               General
-            </button>
+            </motion.button>
             
             {isAuthenticated && (
-              <button
+              <motion.button
                 onClick={() => onSkyChange('user')}
-                className={`px-3 py-1 rounded-full text-xs transition-all ${
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
                   currentSky === 'user'
-                    ? 'bg-purple-600 text-white shadow-lg animate-glow'
-                    : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:scale-105'
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20 backdrop-blur-sm'
                 }`}
               >
                 {viewingUserId ? 'User Sky' : 'My Sky'}
-              </button>
+              </motion.button>
             )}
           </div>
         </div>

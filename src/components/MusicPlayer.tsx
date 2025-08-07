@@ -390,17 +390,28 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`fixed bottom-4 left-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 glass-dark p-3 rounded-xl sm:rounded-full shadow-lg ${className}`}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        whileHover={{ scale: 1.02, y: -2 }}
+        className={`fixed bottom-4 left-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 glass-ultra p-3 rounded-2xl sm:rounded-full shadow-2xl backdrop-blur-xl ${className}`}
+        style={{ willChange: 'transform' }}
       >
         {isAdmin && (
           <div className="relative">
-            <label className={`
+            <motion.label 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`
               cursor-pointer hover:scale-105 transition-all duration-300
               flex items-center gap-2 px-3 py-1.5 
               ${isUploading ? 'bg-gray-600' : 'bg-gradient-to-r from-indigo-600 to-purple-600'} 
-              rounded-full text-white text-sm shadow-lg hover:shadow-xl
+              rounded-full text-white text-sm shadow-lg hover:shadow-xl backdrop-blur-sm
             `}>
-              <Upload className={`w-4 h-4 ${isUploading ? 'animate-spin' : ''}`} />
+              <motion.div
+                animate={isUploading ? { rotate: 360 } : {}}
+                transition={isUploading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
+              >
+                <Upload className="w-4 h-4" />
+              </motion.div>
               <span className="hidden sm:inline">
                 {isUploading ? 'Uploading...' : 'Upload Music'}
               </span>
@@ -412,14 +423,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
                 onChange={handleFileUpload}
                 disabled={isUploading}
               />
-            </label>
+            </motion.label>
             {uploadError && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute top-full mt-2 left-0 right-0 text-center whitespace-nowrap"
+                className="absolute top-full mt-2 left-0 right-0 text-center whitespace-nowrap z-10"
               >
-                <span className="text-red-400 text-xs glass-dark px-2 py-1 rounded-lg shadow-lg">
+                <span className="text-red-400 text-xs glass-ultra px-2 py-1 rounded-lg shadow-lg backdrop-blur-sm">
                   {uploadError}
                 </span>
               </motion.div>
@@ -428,66 +439,81 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
         )}
         
         <div className="flex items-center gap-2">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={toggleMute}
-            className="text-white hover:scale-110 hover:text-blue-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
+            className="text-white hover:text-blue-300 transition-all duration-300 p-2 rounded-full hover:bg-white/10 backdrop-blur-sm"
             disabled={playlist.length === 0}
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={togglePlayPause}
-            className="text-white hover:scale-110 hover:text-green-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
+            className="text-white hover:text-green-300 transition-all duration-300 p-2 rounded-full hover:bg-white/10 backdrop-blur-sm"
             disabled={playlist.length === 0}
           >
             {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={playNextTrack}
-            className="text-white hover:scale-110 hover:text-purple-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
+            className="text-white hover:text-purple-300 transition-all duration-300 p-2 rounded-full hover:bg-white/10 backdrop-blur-sm"
             disabled={playlist.length === 0}
           >
             <SkipForward className="w-5 h-5" />
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setShowPlaylist(!showPlaylist)}
-            className="text-white hover:scale-110 hover:text-yellow-300 transition-all duration-300 p-1 rounded-full hover:bg-white/10"
+            className="text-white hover:text-yellow-300 transition-all duration-300 p-2 rounded-full hover:bg-white/10 backdrop-blur-sm"
             disabled={playlist.length === 0}
           >
             <List className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         {currentTrack ? (
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="flex items-center gap-2"
           >
-            <Music className="w-4 h-4 text-purple-300 animate-pulse" />
-            <span className="text-white text-sm truncate max-w-[120px] sm:max-w-[150px] font-medium">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Music className="w-4 h-4 text-purple-300 drop-shadow-sm" />
+            </motion.div>
+            <span className="text-white text-sm truncate max-w-[120px] sm:max-w-[150px] font-medium drop-shadow-sm">
               {currentTrack.title}
             </span>
           </motion.div>
         ) : playlist.length > 0 ? (
-          <span className="text-gray-400 text-sm">Select a track</span>
+          <span className="text-gray-400 text-sm drop-shadow-sm">Select a track</span>
         ) : isAdmin ? (
-          <span className="text-gray-400 text-sm">Upload music to begin</span>
+          <span className="text-gray-400 text-sm drop-shadow-sm">Upload music to begin</span>
         ) : (
-          <span className="text-gray-400 text-sm">No music available</span>
+          <span className="text-gray-400 text-sm drop-shadow-sm">No music available</span>
         )}
 
         {fetchError && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="flex items-center gap-1"
           >
             <AlertCircle className="w-3 h-3 text-red-400" />
-            <span className="text-red-400 text-xs glass-dark px-2 py-1 rounded-lg">
+            <span className="text-red-400 text-xs glass-ultra px-2 py-1 rounded-lg backdrop-blur-sm">
               {fetchError}
             </span>
           </motion.div>
@@ -510,22 +536,24 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-900 w-full max-w-md rounded-xl shadow-2xl border border-gray-700"
+              className="glass-ultra w-full max-w-md rounded-2xl shadow-2xl border border-white/10 backdrop-blur-xl"
               onClick={e => e.stopPropagation()}
             >
-              <div className="p-4 border-b border-gray-700">
+              <div className="p-4 border-b border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Music className="w-5 h-5 text-purple-400" />
                     <h2 className="text-lg font-semibold text-white">Playlist</h2>
-                    <span className="text-gray-400 text-sm">({playlist.length} tracks)</span>
+                    <span className="text-gray-400 text-sm drop-shadow-sm">({playlist.length} tracks)</span>
                   </div>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setShowPlaylist(false)}
                     className="text-gray-400 hover:text-white transition-colors"
                   >
                     <X size={20} />
-                  </button>
+                  </motion.button>
                 </div>
               </div>
 
@@ -536,10 +564,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
                   </div>
                 ) : (
                   playlist.map((track, index) => (
-                    <div
+                    <motion.div
                       key={track.id}
-                      className={`flex items-center justify-between p-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-b-0 ${
-                        index === currentTrackIndex ? 'bg-gray-800' : ''
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
+                      className={`flex items-center justify-between p-3 transition-colors border-b border-white/5 last:border-b-0 cursor-pointer ${
+                        index === currentTrackIndex ? 'bg-white/5' : ''
                       }`}
                     >
                       <button
@@ -564,14 +596,16 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '' }) => {
                       </button>
                       
                       {isAdmin && (
-                        <button
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => deleteTrack(track.id)}
                           className="text-red-400 hover:text-red-300 transition-colors p-1"
                         >
                           <X size={16} />
-                        </button>
+                        </motion.button>
                       )}
-                    </div>
+                    </motion.div>
                   ))
                 )}
               </div>
