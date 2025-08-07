@@ -22,7 +22,7 @@ export const InteractiveStar: React.FC<InteractiveStarProps> = ({
   // Move useTransform to component level to avoid hooks in loops
   const starTransform = useTransform(
     normalizedOffset,
-    (value) => value * 0.8
+    (value) => value * 0.4 // Slower movement to match new sky speed
   );
 
   return (

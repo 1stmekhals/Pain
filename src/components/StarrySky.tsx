@@ -68,7 +68,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       // Calculate how far mouse has moved
       const deltaX = e.clientX - dragStart.x;
       // Update sky offset based on mouse movement
-      const newOffset = dragStart.offset + deltaX * 1.2; // Slightly faster movement for better feel
+      const newOffset = dragStart.offset + deltaX * 0.5; // Slower movement for better control
       skyOffset.set(newOffset);
     }
   };
@@ -101,7 +101,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       // Calculate touch movement distance
       const deltaX = e.touches[0].clientX - dragStart.x;
       // Update sky offset
-      const newOffset = dragStart.offset + deltaX * 1.2; // Enhanced touch sensitivity
+      const newOffset = dragStart.offset + deltaX * 0.5; // Slower movement for better control
       skyOffset.set(newOffset);
     }
   };
@@ -120,7 +120,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
         e.preventDefault();
         // Calculate movement and update offset
         const deltaX = e.touches[0].clientX - dragStart.x;
-        const newOffset = dragStart.offset + deltaX * 1.2;
+        const newOffset = dragStart.offset + deltaX * 0.5;
         skyOffset.set(newOffset);
       }
     };
@@ -137,7 +137,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
         e.preventDefault();
         // Calculate movement and update offset
         const deltaX = e.clientX - dragStart.x;
-        const newOffset = dragStart.offset + deltaX * 1.2;
+        const newOffset = dragStart.offset + deltaX * 0.5;
         skyOffset.set(newOffset);
       }
     };
@@ -206,7 +206,7 @@ export const StarrySky: React.FC<StarrySkyProps> = ({ stars, onStarClick, isDayT
       </motion.div>
       
       {/* Sky segments with background elements */}
-      {Array.from({ length: 3 }).map((_, segment) => (
+      {Array.from({ length: 4 }).map((_, segment) => (
         <SkySegment
           key={`sky-segment-${segment}`}
           segment={segment}

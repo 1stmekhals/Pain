@@ -38,10 +38,11 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
     (value) => value * 0.1
   );
   
-  const moonTransform = useTransform(
-    normalizedOffset, 
-    (value) => value * 0.3
-  );
+  // Moon should not move with sky - keep it fixed
+  // const moonTransform = useTransform(
+  //   normalizedOffset, 
+  //   (value) => value * 0.3
+  // );
 
   return (
     <>
@@ -189,9 +190,10 @@ export const SkySegment: React.FC<SkySegmentProps> = ({
         style={{
           right: '10%',
           top: '10%',
-          left: `${segment * 100 + 80}%`,
-          willChange: 'transform',
-          x: moonTransform
+          // Fixed position - only show moon in first segment
+          left: segment === 0 ? '80%' : '-200%', // Hide moon in other segments
+          willChange: 'transform'
+          // Removed x: moonTransform to keep moon fixed
         }}
       >
         <div className="relative w-full h-full">
